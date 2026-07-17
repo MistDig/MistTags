@@ -2,6 +2,8 @@
 
 MistTags is a lightweight prefix/suffix plugin for staff-controlled temporary and permanent tags.
 
+Documentation: https://mistdig.github.io/MistTags/
+
 ## Compatibility
 
 This compatibility build targets Java 17 and the Spigot/Bukkit 1.19 API, while using reflection for Paper/Folia scheduler features when they exist.
