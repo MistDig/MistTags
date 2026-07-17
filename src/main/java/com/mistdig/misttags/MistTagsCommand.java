@@ -104,19 +104,25 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
 
     private void sendHelp(CommandSender sender) {
         plugin.messages().send(sender, "help-title");
-        if (sender.hasPermission("misttags.manage") || sender.hasPermission("misttags.custom")) {
+        if (canUseRoot(sender, "addprefix")) {
             plugin.messages().send(sender, "help-addprefix");
+        }
+        if (canUseRoot(sender, "addsuffix")) {
             plugin.messages().send(sender, "help-addsuffix");
+        }
+        if (canUseRoot(sender, "removeprefix")) {
             plugin.messages().send(sender, "help-removeprefix");
+        }
+        if (canUseRoot(sender, "removesuffix")) {
             plugin.messages().send(sender, "help-removesuffix");
         }
-        if (sender.hasPermission("misttags.reload")) {
+        if (canUseRoot(sender, "reload")) {
             plugin.messages().send(sender, "help-reload");
         }
-        plugin.messages().send(sender, "help-list");
-        plugin.messages().send(sender, "help-check");
-        plugin.messages().send(sender, "help-stats");
-        plugin.messages().send(sender, "help-preview");
+        if (canUseRoot(sender, "list")) plugin.messages().send(sender, "help-list");
+        if (canUseRoot(sender, "check")) plugin.messages().send(sender, "help-check");
+        if (canUseRoot(sender, "stats")) plugin.messages().send(sender, "help-stats");
+        if (canUseRoot(sender, "preview")) plugin.messages().send(sender, "help-preview");
     }
 
     private boolean handleList(CommandSender sender, String[] args) {
@@ -400,14 +406,16 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            List<String> options = new ArrayList<>(ROOT_SUBCOMMANDS);
-            if (!sender.hasPermission("misttags.reload")) options.remove("reload");
+            List<String> options = ROOT_SUBCOMMANDS.stream()
+                    .filter(sub -> canUseRoot(sender, sub))
+                    .toList();
             List<String> matches = new ArrayList<>();
             StringUtil.copyPartialMatches(args[0], options, matches);
             return matches;
         }
 
         String sub = args[0].toLowerCase();
+        if (!canUseRoot(sender, sub)) return List.of();
         if ((sub.equals("list") || sub.equals("check")) && args.length == 2) return tagCommand.playerNameSuggestions(args[1]);
         if (sub.equals("preview") && args.length == 2) {
             List<String> suggestions = new ArrayList<>();
@@ -419,5 +427,20 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
 
         String[] rest = Arrays.copyOfRange(args, 1, args.length);
         return tagCommand.complete(sender, sub, rest);
+    }
+
+    private boolean canUseRoot(CommandSender sender, String sub) {
+        return switch (sub) {
+            case "addprefix" -> sender.hasPermission("misttags.manage.addprefix") || sender.hasPermission("misttags.custom");
+            case "addsuffix" -> sender.hasPermission("misttags.manage.addsuffix") || sender.hasPermission("misttags.custom");
+            case "removeprefix" -> sender.hasPermission("misttags.manage.removeprefix") || sender.hasPermission("misttags.custom");
+            case "removesuffix" -> sender.hasPermission("misttags.manage.removesuffix") || sender.hasPermission("misttags.custom");
+            case "list" -> sender.hasPermission("misttags.list");
+            case "check" -> sender.hasPermission("misttags.check");
+            case "stats" -> sender.hasPermission("misttags.stats");
+            case "preview" -> sender.hasPermission("misttags.preview");
+            case "reload" -> sender.hasPermission("misttags.reload");
+            default -> false;
+        };
     }
 }

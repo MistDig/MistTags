@@ -6,7 +6,7 @@
 
     <groupId>com.mistdig</groupId>
     <artifactId>misttags</artifactId>
-    <version>2.3-beta</version>
+    <version>2.3.1-beta</version>
     <packaging>jar</packaging>
 
     <properties>

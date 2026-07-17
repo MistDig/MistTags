@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.1-beta
+
+- Fixed `/mt` help and tab completion so players only see commands they have permission to use.
+- Fixed standalone command tab completion so self-service players only see their own name.
+
 ## 2.3-beta
 
 - Added Paper Dialog UI support for `/mt check <player>` on supported Paper/26.x servers.

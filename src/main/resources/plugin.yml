@@ -1,5 +1,5 @@
 name: MistTags
-version: 2.3-beta
+version: 2.3.1-beta
 main: com.mistdig.misttags.MistTags
 api-version: '1.19'
 description: Lightweight prefix/suffix tags with TAB/LPC/LuckPerms-safe display, PlaceholderAPI, animations, dialogs, and SQLite/MySQL storage.

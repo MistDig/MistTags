@@ -267,15 +267,16 @@ public class TagCommand implements CommandExecutor, TabCompleter {
     /** Split out for the same reason as handle() above -- lets MistTagsCommand reuse this. */
     public List<String> complete(CommandSender sender, String alias, String[] args) {
         String lower = alias.toLowerCase();
+        if (!canUseCommand(sender, lower)) return List.of();
 
         if (lower.startsWith("remove")) {
             if (args.length == 1) {
-                return playerNameSuggestions(args[0]);
+                return targetSuggestions(sender, lower, args[0]);
             }
             return List.of();
         }
 
-        if (args.length == 1) return playerNameSuggestions(args[0]);
+        if (args.length == 1) return targetSuggestions(sender, lower, args[0]);
         if (args.length == 2) return Arrays.asList("30m", "1h", "12h", "1d", "7d", "permanent");
         if (args.length == 3) {
             List<String> suggestions = new ArrayList<>();
@@ -284,6 +285,19 @@ public class TagCommand implements CommandExecutor, TabCompleter {
                 suggestions.add("anim:" + animKey);
             }
             return suggestions;
+        }
+        return List.of();
+    }
+
+    private boolean canUseCommand(CommandSender sender, String label) {
+        return sender.hasPermission(managePermissionFor(label)) || sender.hasPermission("misttags.custom");
+    }
+
+    private List<String> targetSuggestions(CommandSender sender, String label, String prefix) {
+        if (sender.hasPermission(managePermissionFor(label))) return playerNameSuggestions(prefix);
+        if (sender instanceof Player player && sender.hasPermission("misttags.custom")
+                && player.getName().toLowerCase().startsWith(prefix.toLowerCase())) {
+            return List.of(player.getName());
         }
         return List.of();
     }
