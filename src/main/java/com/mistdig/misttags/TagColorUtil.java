@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 public final class TagColorUtil {
 
     private static final Pattern MINI_COLOR = Pattern.compile("<(/?)(#[0-9a-fA-F]{6}|[a-zA-Z_]+)(:[^>]*)?>");
-    private static final Pattern LEGACY_COLOR = Pattern.compile("(?i)[&§]([0-9a-f])");
+    private static final Pattern LEGACY_COLOR = Pattern.compile("(?i)[&\\u00A7]([0-9a-f])");
     private static final Map<Character, ChatColor> LEGACY = Map.ofEntries(
             Map.entry('0', ChatColor.BLACK), Map.entry('1', ChatColor.DARK_BLUE),
             Map.entry('2', ChatColor.DARK_GREEN), Map.entry('3', ChatColor.DARK_AQUA),

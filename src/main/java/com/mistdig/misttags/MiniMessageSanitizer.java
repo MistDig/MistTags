@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public final class MiniMessageSanitizer {
 
     private static final Pattern TAG = Pattern.compile("<(/?)([a-zA-Z_#][a-zA-Z0-9_#-]*)(:[^>]*)?>");
-    private static final Pattern LEGACY = Pattern.compile("(?i)[&§][0-9a-fk-or]");
+    private static final Pattern LEGACY = Pattern.compile("(?i)[&\\u00A7][0-9a-fk-or]");
     private static final Set<String> ALLOWED = Set.of(
             "black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple",
             "gold", "gray", "grey", "dark_gray", "dark_grey", "blue", "green", "aqua",
@@ -82,9 +82,9 @@ public final class MiniMessageSanitizer {
 
     private static String hexToLegacy(String hex) {
         String digits = hex.substring(1);
-        StringBuilder out = new StringBuilder("§x");
+        StringBuilder out = new StringBuilder("\u00A7x");
         for (char c : digits.toCharArray()) {
-            out.append('§').append(c);
+            out.append('\u00A7').append(c);
         }
         return out.toString();
     }

@@ -8,7 +8,7 @@ animations:
       - "<yellow>[VIP]</yellow> "
       - "<green>[VIP]</green> "
       - "<blue>[VIP]</blue> "
-      - "<purple>[VIP]</purple> "
+      - "<light_purple>[VIP]</light_purple> "
   pulse:
     update-ticks: 10 # Multi-tick breathing effect
     frames:

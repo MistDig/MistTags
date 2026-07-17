@@ -1,5 +1,5 @@
 name: MistTags
-version: 2.1
+version: 2.1.1-beta
 main: com.mistdig.misttags.MistTags
 api-version: '1.19'
 
