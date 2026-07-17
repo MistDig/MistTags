@@ -1,0 +1,95 @@
+name: MistTags
+version: 2.1
+main: com.mistdig.misttags.MistTags
+api-version: '1.19'
+
+# Required for Folia to load the plugin at all -- Folia refuses to enable plugins that
+# don't explicitly declare this, even if they'd otherwise work fine. Safe to leave true on
+# regular Paper/Purpur/etc. too, since it's a no-op there. See MistTagsScheduler for how
+# the actual per-player/global scheduling stays Folia-safe.
+folia-supported: true
+
+# All optional. PlaceholderAPI is only needed if you want other plugins to read
+# %misttags_prefix%/%misttags_suffix%. The rest are only "used" in the sense that MistTags
+# detects them and defers rendering to them in "auto" display mode -- see
+# display.known-display-plugins in config.yml. Listing them here (rather than leaving them
+# undeclared) makes sure they load before MistTags so detection at startup is accurate.
+softdepend: [PlaceholderAPI, TAB, LPC, LuckPerms, NametagEdit, Essentials, DeluxeTags, UltraPrefixes, TitleManager]
+
+commands:
+  misttags:
+    description: Unified MistTags command -- addprefix/addsuffix/removeprefix/removesuffix/list/stats/preview/reload.
+    usage: /misttags <addprefix|addsuffix|removeprefix|removesuffix|list|stats|preview|reload> ...
+    aliases: [mt]
+  addprefix:
+    description: Add a temporary prefix or animation to a player.
+    usage: /addprefix <player> <duration> <tag/anim:id>
+  addsuffix:
+    description: Add a temporary suffix or animation to a player.
+    usage: /addsuffix <player> <duration> <tag/anim:id>
+  removeprefix:
+    description: Remove a player's active prefix.
+    usage: /removeprefix <player>
+  removesuffix:
+    description: Remove a player's active suffix.
+    usage: /removesuffix <player>
+
+# Permission checks are done in code (TagCommand#isAuthorized), not via the "permission:"
+# field above, because a single command needs two different authorization paths: full
+# staff access to any player (misttags.manage.*) vs. self-service access to your own tag
+# only (misttags.custom). Bukkit's command permission field can't express that distinction.
+permissions:
+  misttags.manage:
+    description: Full access to add/remove prefixes and suffixes for any player
+    default: op
+    children:
+      misttags.manage.addprefix: true
+      misttags.manage.addsuffix: true
+      misttags.manage.removeprefix: true
+      misttags.manage.removesuffix: true
+  misttags.manage.addprefix:
+    description: Add/edit a prefix for any player
+    default: op
+  misttags.manage.addsuffix:
+    description: Add/edit a suffix for any player
+    default: op
+  misttags.manage.removeprefix:
+    description: Remove any player's prefix
+    default: op
+  misttags.manage.removesuffix:
+    description: Remove any player's suffix
+    default: op
+  misttags.custom:
+    description: Set or remove your own prefix/suffix only (self-service, no access to other players)
+    default: false
+  misttags.reload:
+    description: Reload config.yml and animations.yml via /misttags reload (or /mt reload)
+    default: op
+  misttags.list:
+    description: List active tags via /misttags list
+    default: op
+  misttags.stats:
+    description: Show MistTags runtime stats via /misttags stats
+    default: op
+  misttags.preview:
+    description: Preview a tag above the hotbar via /misttags preview
+    default: true
+
+  # Optional rank ladder for raising a self-service player's own duration cap above
+  # config.yml's custom.default-max-duration (30 days out of the box). These four are just
+  # the tiers MistTags ships with by default -- the actual permission names and their
+  # durations are read from config.yml's custom.duration-tiers, so feel free to add/remove/
+  # rename tiers there; keep these entries in sync (or drop the ones you don't use) so they
+  # show up correctly in permission-plugin GUIs.
+  misttags.custom.duration.1d:
+    description: Self-service prefix/suffix duration cap of 1 day (see config.yml custom.duration-tiers)
+    default: false
+  misttags.custom.duration.10d:
+    description: Self-service prefix/suffix duration cap of 10 days (see config.yml custom.duration-tiers)
+    default: false
+  misttags.custom.duration.month:
+    description: Self-service prefix/suffix duration cap of 30 days (see config.yml custom.duration-tiers)
+    default: false
+  misttags.custom.duration.year:
+    description: Self-service prefix/suffix duration cap of 365 days (see config.yml custom.duration-tiers)
+    default: false

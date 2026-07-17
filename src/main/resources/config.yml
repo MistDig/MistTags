@@ -1,0 +1,143 @@
+﻿display:
+  # standalone      : MistTags renders prefixes/suffixes itself, in chat and above
+  #                   players' heads / in the tab list, using vanilla scoreboard teams.
+  #                   No other plugin needed.
+  # tab             : MistTags pushes prefixes/suffixes directly into TAB's API. With the
+  #                   default behavior below, TAB/LuckPerms stays visible until a player
+  #                   has an active MistTags tag, then the MistTags tag wins for that player.
+  # placeholder-only : MistTags only exposes %misttags_prefix% / %misttags_suffix%
+  #                   via PlaceholderAPI and renders nothing itself. Use this so TAB,
+  #                   LuckPerms, EssentialsXChat, NametagEdit, or any other display plugin
+  #                   can reference those placeholders in its own config alongside its own
+  #                   prefix/suffix, instead of MistTags fighting it for control.
+  # auto             : (recommended, default) if TAB or LPC is installed with
+  #                   PlaceholderAPI, MistTags auto-wires smart placeholders into those
+  #                   plugins and hands display off to them. If no supported display/chat
+  #                   plugin is found, MistTags uses standalone chat/tab/nametag display.
+  #                   This lets /mt addprefix override LuckPerms for tagged players without
+  #                   blanking normal rank prefixes for everyone else.
+  mode: auto
+
+  # Only relevant in standalone mode.
+  chat-format: true
+  nametag-and-tablist: true
+
+  # Plugin names (must match the `name:` field in that plugin's own plugin.yml) that count
+  # as "already owning" prefix/suffix display for the purposes of "auto" above. Add your
+  # own display/chat/permissions plugin's name here if it's not in this default list.
+  known-display-plugins:
+    - TAB
+    - LuckPerms
+    - NametagEdit
+    - Essentials
+    - DeluxeTags
+    - UltraPrefixes
+    - TitleManager
+
+  # Only relevant when display.mode resolves to "tab" (this is what auto chooses when TAB
+  # is installed). MistTags reads TAB's current value first, which may itself be built from
+  # %luckperms_prefix% or a group-based tag in TAB's own config.
+  #
+  # override : keep TAB/LuckPerms for normal players, but if a staff member uses
+  #            /mt addprefix or /mt addsuffix on that player, the MistTags value wins.
+  # combine  : show TAB/LuckPerms and MistTags together.
+  tab-active-tag-behavior: override
+  # "existing-first" : TAB/LuckPerms's own prefix stays first, MistTags' tag appended after.
+  # "misttags-first"  : MistTags' tag goes first instead.
+  tab-combine-order: existing-first
+  tab-combine-separator: " "
+
+integrations:
+  # When true, MistTags will detect supported display/chat plugins and place its smart
+  # placeholders into their config files automatically. A one-time ".misttags-backup" copy
+  # is made beside each file before MistTags edits it.
+  auto-configure: true
+
+  # Reload supported integrations after MistTags edits their config files.
+  auto-reload: true
+
+  tab:
+    # If TAB and PlaceholderAPI are installed, MistTags writes these into TAB groups.yml:
+    # %misttags_display_prefix% and %misttags_display_suffix%
+    # Those placeholders show MistTags first, then fall back to LuckPerms.
+    enabled: true
+
+  lpc:
+    # If LPC and PlaceholderAPI are installed, MistTags writes its smart placeholders into
+    # LPC's chat-format so chat follows the same MistTags-then-LuckPerms behavior.
+    enabled: true
+
+# How often (seconds) the in-memory tag cache is flushed to data.yml. Lower = safer against
+# crashes, higher = less disk I/O. A final save always happens on shutdown regardless.
+save-interval-seconds: 10
+
+database:
+  # false = store normal player tag data in data.yml.
+  # true  = ignore data.yml and store player tag data through JDBC instead.
+  enabled: false
+
+  # SQLite is the default and writes plugins/MistTags/misttags.db.
+  # For MySQL/MariaDB, use a JDBC URL like:
+  # jdbc:mysql://127.0.0.1:3306/misttags?useSSL=false&characterEncoding=utf8
+  url: ""
+  username: ""
+  password: ""
+
+# Emojis/symbols are not whitelisted. Any Unicode emoji can be used in a prefix/suffix
+# as long as the server/client/display plugin can render it. If using MySQL, make sure
+# the database/table connection supports utf8mb4 so emojis are saved correctly.
+
+# Restrictions that apply ONLY when a player sets their own prefix/suffix via misttags.custom
+# (self-service). Staff acting through any misttags.manage.* node always bypass everything
+# in this section -- these settings exist to stop self-service from being abused, not to
+# limit staff.
+custom:
+  # Minimum seconds a player must wait between changing their own prefix, and separately
+  # between changing their own suffix (they're tracked independently, so setting a new
+  # prefix doesn't also put your suffix on cooldown). This is what stops "get a new one
+  # every second" spam.
+  cooldown-seconds: 300
+
+  # Visible-character length range. Color/formatting tags (e.g. <red>, <bold>) don't count
+  # towards this, only the actual text does, so players can't dodge the cap by wrapping
+  # their text in extra formatting.
+  min-length: 1
+  max-length: 16
+
+  # Case-insensitive substring blacklist: if the visible text contains ANY of these
+  # anywhere, the tag is rejected. Add your own words here (profanity, slurs, staff-title
+  # impersonation like "Admin"/"Owner"/"Mod", your own server's banned terms, etc.).
+  banned-words:
+    - admin
+    - owner
+    - staff
+    - moderator
+    - console
+    - server
+
+  # Optional regex blacklist for anything a plain word list can't catch (e.g. blocking
+  # zalgo/combining characters). Matched case-insensitively against the visible text.
+  # Leave empty if you don't need this.
+  banned-patterns: []
+  #  - "\\p{M}"              # zalgo / combining-character spam
+  #  - "(?i)\\bhack(er)?\\b" # example: block "hack"/"hacker" as a whole word
+
+  # The duration cap a self-service player gets if they don't hold any of the
+  # duration-tiers permissions below. This is the "30 days" default.
+  default-max-duration: 30d
+
+  # Grant one of these permissions to a rank (e.g. a donor/VIP ladder) to raise that rank's
+  # own duration cap above the default. The plugin checks every tier the player holds and
+  # uses whichever max-duration is HIGHEST among them, so ranks can simply stack more of
+  # these permissions as players rank up -- order in this list doesn't matter. Add, remove,
+  # or retarget entries freely; the permission names are just plain strings you choose and
+  # then grant via your permissions plugin (LuckPerms, etc.).
+  duration-tiers:
+    - permission: misttags.custom.duration.1d
+      max-duration: 1d
+    - permission: misttags.custom.duration.10d
+      max-duration: 10d
+    - permission: misttags.custom.duration.month
+      max-duration: 30d
+    - permission: misttags.custom.duration.year
+      max-duration: 365d

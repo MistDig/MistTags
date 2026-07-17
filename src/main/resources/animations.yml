@@ -1,0 +1,18 @@
+# Configuration definitions for animated layout placeholders
+animations:
+  rainbow:
+    update-ticks: 4 # Changes frames every 4 ticks (5 times a second)
+    frames:
+      - "<red>[VIP]</red> "
+      - "<gold>[VIP]</gold> "
+      - "<yellow>[VIP]</yellow> "
+      - "<green>[VIP]</green> "
+      - "<blue>[VIP]</blue> "
+      - "<purple>[VIP]</purple> "
+  pulse:
+    update-ticks: 10 # Multi-tick breathing effect
+    frames:
+      - "<dark_red><bold>[STAFF]</bold></dark_red> "
+      - "<red><bold>[STAFF]</bold></red> "
+      - "<white><bold>[STAFF]</bold></white> "
+      - "<red><bold>[STAFF]</bold></red> "
