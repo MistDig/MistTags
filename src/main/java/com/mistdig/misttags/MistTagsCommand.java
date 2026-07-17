@@ -1,5 +1,6 @@
 package com.mistdig.misttags;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -25,7 +26,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
     private static final List<String> ADD_REMOVE_SUBCOMMANDS =
             List.of("addprefix", "addsuffix", "removeprefix", "removesuffix");
     private static final List<String> ROOT_SUBCOMMANDS =
-            List.of("addprefix", "addsuffix", "removeprefix", "removesuffix", "list", "stats", "preview", "reload");
+            List.of("addprefix", "addsuffix", "removeprefix", "removesuffix", "list", "check", "stats", "preview", "reload");
 
     private final MistTags plugin;
     private final TagCommand tagCommand;
@@ -50,6 +51,9 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
         }
         if (sub.equals("list")) {
             return handleList(sender, rest);
+        }
+        if (sub.equals("check")) {
+            return handleCheck(sender, rest);
         }
         if (sub.equals("stats")) {
             return handleStats(sender);
@@ -95,6 +99,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
             plugin.messages().send(sender, "help-reload");
         }
         plugin.messages().send(sender, "help-list");
+        plugin.messages().send(sender, "help-check");
         plugin.messages().send(sender, "help-stats");
         plugin.messages().send(sender, "help-preview");
     }
@@ -108,11 +113,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
             String target = args[0];
             for (PlayerTagData data : plugin.getAllPlayerData()) {
                 if (data.getName().equalsIgnoreCase(target)) {
-                    plugin.messages().send(sender, "list-player", Map.of(
-                            "player", data.getName(),
-                            "prefix_value", printable(data.getPrefix()),
-                            "suffix_value", printable(data.getSuffix())
-                    ));
+                    sendListRow(sender, data, true);
                     return true;
                 }
             }
@@ -125,17 +126,35 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
         for (PlayerTagData data : plugin.getAllPlayerData()) {
             if (data.isEmpty()) continue;
             shown++;
-            plugin.messages().send(sender, "list-row", Map.of(
-                    "player", data.getName(),
-                    "prefix_value", printable(data.getPrefix()),
-                    "suffix_value", printable(data.getSuffix())
-            ));
+            sendListRow(sender, data, false);
             if (shown >= 25) {
                 plugin.messages().send(sender, "list-more", Map.of("limit", "25"));
                 break;
             }
         }
         if (shown == 0) plugin.messages().send(sender, "list-empty");
+        return true;
+    }
+
+    private boolean handleCheck(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("misttags.check")) {
+            plugin.messages().send(sender, "no-permission");
+            return true;
+        }
+        if (!(sender instanceof Player player)) {
+            plugin.messages().send(sender, "check-player-only");
+            return true;
+        }
+        if (args.length < 1) {
+            plugin.messages().send(sender, "usage-check");
+            return true;
+        }
+        PlayerTagData data = findData(args[0]);
+        if (data == null) {
+            plugin.messages().send(sender, "list-missing", Map.of("player", args[0]));
+            return true;
+        }
+        plugin.getTagManageMenu().open(player, data);
         return true;
     }
 
@@ -198,14 +217,39 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
         // player rather than a bare main-thread timer -- see MistTagsScheduler.
         var task = plugin.getScheduler().runForPlayerTimer(player, () ->
                 ActionBarUtil.send(player, plugin.renderStoredRaw(preview)), 0L, 20L);
-        plugin.getScheduler().runGlobalDelayed(() -> plugin.getScheduler().cancel(task), 20L * 10L);
+        plugin.getScheduler().runGlobalDelayed(() -> {
+            plugin.getScheduler().cancel(task);
+            plugin.getScheduler().runForPlayer(player, () -> ActionBarUtil.send(player, ""));
+        }, 20L * 5L);
         plugin.getLogger().info(sender.getName() + " previewed MistTag '" + stored + "'.");
         plugin.messages().send(sender, "preview-started");
         return true;
     }
 
-    private String printable(String value) {
-        return value == null ? "(none)" : plugin.renderStoredRaw(value);
+    private PlayerTagData findData(String name) {
+        for (PlayerTagData data : plugin.getAllPlayerData()) {
+            if (data.getName() != null && data.getName().equalsIgnoreCase(name)) return data;
+        }
+        return null;
+    }
+
+    private void sendListRow(CommandSender sender, PlayerTagData data, boolean detailed) {
+        String line = (detailed ? plugin.messages().prefix() + " " : "")
+                + ChatColor.YELLOW + data.getName()
+                + ChatColor.GRAY + " prefix=" + rendered(data.getPrefix())
+                + ChatColor.GRAY + " suffix=" + rendered(data.getSuffix());
+
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(line);
+            return;
+        }
+
+        ClickableMessageUtil.sendRunCommand(player, line, "/mt check " + data.getName(),
+                ChatColor.YELLOW + "Click to manage " + data.getName() + "'s MistTags");
+    }
+
+    private String rendered(String value) {
+        return value == null ? ChatColor.GRAY + "(none)" : MiniMessageSanitizer.toLegacy(plugin.renderStoredRaw(value));
     }
 
     @Override
@@ -219,7 +263,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
         }
 
         String sub = args[0].toLowerCase();
-        if (sub.equals("list") && args.length == 2) return tagCommand.playerNameSuggestions(args[1]);
+        if ((sub.equals("list") || sub.equals("check")) && args.length == 2) return tagCommand.playerNameSuggestions(args[1]);
         if (sub.equals("preview") && args.length == 2) {
             List<String> suggestions = new ArrayList<>();
             suggestions.add("<Raw MiniMessage Text>");

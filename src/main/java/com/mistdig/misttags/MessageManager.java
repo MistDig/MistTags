@@ -6,6 +6,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +27,15 @@ public class MessageManager {
         File file = new File(plugin.getDataFolder(), "msg.yml");
         if (!file.exists()) plugin.saveResource("msg.yml", false);
         config = YamlConfiguration.loadConfiguration(file);
+        try (InputStream stream = plugin.getResource("msg.yml")) {
+            if (stream != null) {
+                YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
+                        new InputStreamReader(stream, StandardCharsets.UTF_8));
+                config.setDefaults(defaults);
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("Could not load default msg.yml fallback: " + e.getMessage());
+        }
     }
 
     public void send(CommandSender sender, String key) {

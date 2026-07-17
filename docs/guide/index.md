@@ -10,17 +10,24 @@ MistTags is a Bukkit-family plugin for temporary and permanent player prefixes/s
 
 ## Optional Plugins
 
-MistTags works by itself, but can integrate with:
+MistTags works by itself.
+
+Directly supported:
 
 - PlaceholderAPI
 - TAB
 - LPC
 - LuckPerms
+
+Manual PlaceholderAPI compatibility:
+
 - NametagEdit
 - Essentials
 - DeluxeTags
 - UltraPrefixes
 - TitleManager
+
+Manual compatibility means the other plugin must support PlaceholderAPI placeholders, and you may need to add `%misttags_display_prefix%` / `%misttags_display_suffix%` yourself.
 
 ## Setup
 
@@ -42,6 +49,12 @@ Preview a tag above your hotbar:
 
 ```text
 /mt preview <gold>[STAFF]</gold>
+```
+
+Open the staff manage menu:
+
+```text
+/mt check YourName
 ```
 
 Remove the test prefix:

@@ -12,8 +12,9 @@ All main commands use `/misttags` with alias `/mt`.
 | `/mt removesuffix <player>` | Remove a player's active MistTags suffix. |
 | `/mt list` | List all active tags. |
 | `/mt list <player>` | View one player's active tags. |
+| `/mt check <player>` | Open the staff manage menu for a player. |
 | `/mt stats` | Show counts for active tags, animations, cache, storage, and display mode. |
-| `/mt preview <tag>` | Show a tag above your hotbar for a short preview. |
+| `/mt preview <tag>` | Show a tag above your hotbar for 5 seconds. |
 | `/mt reload` | Reload config, messages, animations, and integrations. |
 
 Legacy command aliases are also available:
@@ -46,6 +47,20 @@ Use an animation from `animations.yml` by writing `anim:<id>`.
 /mt addsuffix Alex perm anim:pulse
 ```
 
+## Manage Menu
+
+`/mt check <player>` opens the staff manage menu.
+
+It shows:
+
+- rendered prefix and suffix
+- raw saved prefix and suffix
+- time left or permanent status
+- delete buttons
+- edit buttons that paste the correct edit command into chat
+
+Rows in `/mt list` are clickable for players and open the same menu.
+
 ## Permissions
 
 | Permission | Description | Default |
@@ -58,6 +73,7 @@ Use an animation from `animations.yml` by writing `anim:<id>`.
 | `misttags.custom` | Let a player manage only their own tag within config limits. | `false` |
 | `misttags.reload` | Use `/mt reload`. | `op` |
 | `misttags.list` | Use `/mt list`. | `op` |
+| `misttags.check` | Use `/mt check`. | `op` |
 | `misttags.stats` | Use `/mt stats`. | `op` |
 | `misttags.preview` | Use `/mt preview`. | `true` |
 | `misttags.custom.duration.1d` | Example self-service duration tier. | `false` |

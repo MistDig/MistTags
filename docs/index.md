@@ -4,7 +4,7 @@ layout: home
 hero:
   name: MistTags
   text: Lightweight prefix and suffix tags
-  tagline: Staff-controlled temporary and permanent tags with TAB, LPC, LuckPerms, PlaceholderAPI, animations, and database storage.
+  tagline: Staff-controlled temporary and permanent tags with TAB, LPC, LuckPerms, PlaceholderAPI, animations, database storage, and a staff manage menu.
   actions:
     - theme: brand
       text: Get Started

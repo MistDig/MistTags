@@ -55,6 +55,23 @@ The smart display placeholders use LuckPerms as fallback when no MistTags tag is
 %misttags_display_suffix%
 ```
 
+## Manual PlaceholderAPI Compatibility
+
+These plugins are not auto-configured by MistTags, but can usually use MistTags placeholders manually if they support PlaceholderAPI:
+
+- NametagEdit
+- Essentials
+- DeluxeTags
+- UltraPrefixes
+- TitleManager
+
+Use:
+
+```text
+%misttags_display_prefix%
+%misttags_display_suffix%
+```
+
 ## Standalone Mode
 
 If TAB/LPC are not installed, MistTags can format chat, tab list, and nametags itself.

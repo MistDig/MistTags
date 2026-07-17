@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.2-beta
+
+- Added `/mt check <player>` staff manage menu.
+- Made `/mt list` show rendered colored prefixes/suffixes instead of raw MiniMessage.
+- Made `/mt list` rows clickable for players, opening the manage menu.
+- Added manage buttons for delete, edit-command suggestion, and time-left checks.
+- Fixed `/mt preview` to last 5 seconds.
+- Updated plugin website metadata to the MistTags docs site.
+- Added default-message fallback so new messages still work on old `msg.yml` files.
+
 ## 2.1.2-beta
 
 - Added plugin description, website, and author metadata so `/version MistTags` shows useful in-game information.

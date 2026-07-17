@@ -1,9 +1,9 @@
 name: MistTags
-version: 2.1.2-beta
+version: 2.2-beta
 main: com.mistdig.misttags.MistTags
 api-version: '1.19'
 description: Lightweight prefix/suffix tags with TAB/LPC/LuckPerms-safe display, PlaceholderAPI, animations, and YAML/database storage.
-website: https://github.com/MistDig/MistTags
+website: https://mistdig.github.io/MistTags/
 authors: [MistDig]
 
 # Required for Folia to load the plugin at all -- Folia refuses to enable plugins that
@@ -21,8 +21,8 @@ softdepend: [PlaceholderAPI, TAB, LPC, LuckPerms, NametagEdit, Essentials, Delux
 
 commands:
   misttags:
-    description: Unified MistTags command -- addprefix/addsuffix/removeprefix/removesuffix/list/stats/preview/reload.
-    usage: /misttags <addprefix|addsuffix|removeprefix|removesuffix|list|stats|preview|reload> ...
+    description: Unified MistTags command -- addprefix/addsuffix/removeprefix/removesuffix/list/check/stats/preview/reload.
+    usage: /misttags <addprefix|addsuffix|removeprefix|removesuffix|list|check|stats|preview|reload> ...
     aliases: [mt]
   addprefix:
     description: Add a temporary prefix or animation to a player.
@@ -50,6 +50,7 @@ permissions:
       misttags.manage.addsuffix: true
       misttags.manage.removeprefix: true
       misttags.manage.removesuffix: true
+      misttags.check: true
   misttags.manage.addprefix:
     description: Add/edit a prefix for any player
     default: op
@@ -70,6 +71,9 @@ permissions:
     default: op
   misttags.list:
     description: List active tags via /misttags list
+    default: op
+  misttags.check:
+    description: Open the MistTags manage menu via /misttags check
     default: op
   misttags.stats:
     description: Show MistTags runtime stats via /misttags stats
