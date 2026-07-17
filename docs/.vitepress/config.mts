@@ -11,6 +11,7 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/' },
       { text: 'Commands', link: '/guide/commands' },
+      { text: 'Animations', link: '/guide/animations' },
       { text: 'Placeholders', link: '/guide/placeholders' },
       { text: 'Config', link: '/guide/config' },
       { text: 'GitHub', link: 'https://github.com/MistDig/MistTags' }
@@ -21,6 +22,7 @@ export default defineConfig({
         items: [
           { text: 'Installation', link: '/guide/' },
           { text: 'Commands & Permissions', link: '/guide/commands' },
+          { text: 'Animation Presets', link: '/guide/animations' },
           { text: 'Placeholders', link: '/guide/placeholders' },
           { text: 'Configuration', link: '/guide/config' },
           { text: 'Integrations', link: '/guide/integrations' },
