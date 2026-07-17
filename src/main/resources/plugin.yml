@@ -1,7 +1,10 @@
 name: MistTags
-version: 2.1.1-beta
+version: 2.1.2-beta
 main: com.mistdig.misttags.MistTags
 api-version: '1.19'
+description: Lightweight prefix/suffix tags with TAB/LPC/LuckPerms-safe display, PlaceholderAPI, animations, and YAML/database storage.
+website: https://github.com/MistDig/MistTags
+authors: [MistDig]
 
 # Required for Folia to load the plugin at all -- Folia refuses to enable plugins that
 # don't explicitly declare this, even if they'd otherwise work fine. Safe to leave true on

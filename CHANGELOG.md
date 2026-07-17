@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.2-beta
+
+- Added plugin description, website, and author metadata so `/version MistTags` shows useful in-game information.
+
 ## 2.1.1-beta
 
 - Fixed legacy color handling by using safe Unicode escapes for section-color conversion.
