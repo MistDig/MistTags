@@ -6,10 +6,10 @@ MistTags registers a PlaceholderAPI expansion with the identifier `misttags`.
 
 | Placeholder | Description |
 | --- | --- |
-| `%misttags_prefix%` | Current rendered prefix, including animation frame if animated. |
-| `%misttags_suffix%` | Current rendered suffix, including animation frame if animated. |
-| `%misttags_display_prefix%` | MistTags prefix if active; otherwise LuckPerms prefix if available through PlaceholderAPI. |
-| `%misttags_display_suffix%` | MistTags suffix if active; otherwise LuckPerms suffix if available through PlaceholderAPI. |
+| `%misttags_prefix%` | Current rendered prefix, including animation frame if animated. Adds one trailing display space when not empty. |
+| `%misttags_suffix%` | Current rendered suffix, including animation frame if animated. Adds one leading display space when not empty. |
+| `%misttags_display_prefix%` | MistTags prefix if active; otherwise LuckPerms prefix if available through PlaceholderAPI. Adds one trailing display space when not empty. |
+| `%misttags_display_suffix%` | MistTags suffix if active; otherwise LuckPerms suffix if available through PlaceholderAPI. Adds one leading display space when not empty. |
 | `%misttags_prefix_raw%` | Stored prefix value, such as `anim:rainbow`. |
 | `%misttags_suffix_raw%` | Stored suffix value, such as `anim:pulse`. |
 | `%misttags_prefix_plain%` | Prefix with formatting removed. |

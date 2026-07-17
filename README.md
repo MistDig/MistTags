@@ -1,4 +1,4 @@
-# MistTags 2.2 Beta
+# MistTags 2.3 Beta
 
 MistTags is a lightweight prefix/suffix plugin for staff-controlled temporary and permanent tags.
 
@@ -33,8 +33,9 @@ This is a beta build. Test on your exact server jar before marking it stable.
 - TAB/LPC/LuckPerms-safe display behavior
 - PlaceholderAPI expansion with GUI-friendly placeholders
 - Editable messages in `msg.yml`
-- YAML storage by default
-- Optional SQLite/MySQL storage
+- SQLite storage by default, with optional MySQL/MariaDB storage
+- Paper 1.21.7+/26.x Dialog UI for `/mt check` management
+- Editable command aliases through `commands.yml`
 - Any Unicode emoji/symbol in tags, if the client/server/display plugin can render it
 
 ## Display Modes
@@ -45,8 +46,8 @@ This is a beta build. Test on your exact server jar before marking it stable.
 - `placeholder-only`: MistTags only exposes PlaceholderAPI values for another plugin to render.
 
 Smart placeholders:
-- `%misttags_display_prefix%`: MistTags prefix if active, otherwise LuckPerms prefix.
-- `%misttags_display_suffix%`: MistTags suffix if active, otherwise LuckPerms suffix.
+- `%misttags_display_prefix%`: MistTags prefix if active, otherwise LuckPerms prefix. Adds one trailing display space when not empty.
+- `%misttags_display_suffix%`: MistTags suffix if active, otherwise LuckPerms suffix. Adds one leading display space when not empty.
 
 ## Notes
 

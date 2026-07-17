@@ -23,8 +23,8 @@ public class ChatListener implements Listener {
         PlayerTagData data = plugin.getData(player.getUniqueId());
         if (data == null || data.isEmpty()) return;
 
-        String prefix = renderStored(data.getPrefix());
-        String suffix = renderStored(data.getSuffix());
+        String prefix = TagSpacingUtil.prefix(renderStored(data.getPrefix()));
+        String suffix = TagSpacingUtil.suffix(renderStored(data.getSuffix()));
         ChatColor nameColor = TagColorUtil.deriveLastColor(renderRaw(data.getPrefix()));
         String coloredName = (nameColor == null ? "" : nameColor.toString()) + "%1$s";
         event.setFormat(escapeFormat(prefix + coloredName + suffix + ChatColor.RESET + ": %2$s"));

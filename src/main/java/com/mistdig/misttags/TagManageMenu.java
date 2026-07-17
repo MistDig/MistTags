@@ -32,6 +32,8 @@ public final class TagManageMenu implements Listener {
     }
 
     public void open(Player viewer, PlayerTagData targetData) {
+        if (PaperDialogUtil.showManageDialog(plugin, viewer, targetData)) return;
+
         MenuTarget target = new MenuTarget(targetData.getUuid(), targetData.getName());
         Inventory inventory = Bukkit.createInventory(new Holder(target), 27,
                 ChatColor.DARK_AQUA + "MistTags: " + target.name());

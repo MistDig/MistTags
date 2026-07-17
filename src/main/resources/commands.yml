@@ -1,0 +1,34 @@
+# Custom command aliases for MistTags.
+#
+# These aliases do not change what the commands do. They only let server owners choose
+# extra command names that are rewritten to MistTags' normal internal commands.
+#
+# Built-in commands from plugin.yml still exist:
+# /misttags, /mt, /addprefix, /addsuffix, /removeprefix, /removesuffix
+
+commands:
+  misttags:
+    target: "misttags"
+    aliases:
+      - "misttags"
+      - "mt"
+
+  addprefix:
+    target: "addprefix"
+    aliases:
+      - "addprefix"
+
+  addsuffix:
+    target: "addsuffix"
+    aliases:
+      - "addsuffix"
+
+  removeprefix:
+    target: "removeprefix"
+    aliases:
+      - "removeprefix"
+
+  removesuffix:
+    target: "removesuffix"
+    aliases:
+      - "removesuffix"

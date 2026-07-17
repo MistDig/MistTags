@@ -21,6 +21,7 @@ public final class ClickableMessageUtil {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static boolean send(Player player, String text, String clickAction, String command, String hoverText) {
+        if (sendAdventure(player, text, clickAction, command, hoverText)) return true;
         try {
             Class<?> textComponentClass = Class.forName("net.md_5.bungee.api.chat.TextComponent");
             Class<?> baseComponentClass = Class.forName("net.md_5.bungee.api.chat.BaseComponent");
@@ -35,11 +36,55 @@ public final class ClickableMessageUtil {
             if (hoverText != null && !hoverText.isBlank()) applyHover(textComponentClass, baseComponentClass, component, hoverText);
 
             Object spigot = player.getClass().getMethod("spigot").invoke(player);
-            Method send = spigot.getClass().getMethod("sendMessage", baseComponentClass);
-            send.invoke(spigot, component);
+            Object array = Array.newInstance(baseComponentClass, 1);
+            Array.set(array, 0, component);
+            Method send = spigot.getClass().getMethod("sendMessage", array.getClass());
+            send.invoke(spigot, array);
             return true;
         } catch (ReflectiveOperationException | RuntimeException ignored) {
             return false;
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static boolean sendAdventure(Player player, String text, String clickAction, String command, String hoverText) {
+        try {
+            Class<?> componentClass = Class.forName("net.kyori.adventure.text.Component");
+            Class<?> clickEventClass = Class.forName("net.kyori.adventure.text.event.ClickEvent");
+            Class<?> hoverEventClass = Class.forName("net.kyori.adventure.text.event.HoverEvent");
+
+            Object component = legacyComponent(text);
+            String clickMethod = clickAction.equals("SUGGEST_COMMAND") ? "suggestCommand" : "runCommand";
+            Object clickEvent = clickEventClass.getMethod(clickMethod, String.class).invoke(null, command);
+            component = componentClass.getMethod("clickEvent", clickEventClass).invoke(component, clickEvent);
+
+            if (hoverText != null && !hoverText.isBlank()) {
+                try {
+                    Object hoverComponent = legacyComponent(hoverText);
+                    Object hoverEvent = hoverEventClass.getMethod("showText", componentClass).invoke(null, hoverComponent);
+                    component = componentClass.getMethod("hoverEvent", Class.forName("net.kyori.adventure.text.event.HoverEventSource"))
+                            .invoke(component, hoverEvent);
+                } catch (ReflectiveOperationException ignored) {
+                    // Click still matters more than hover. Older/relocated Adventure builds vary here.
+                }
+            }
+
+            Class<?> audienceClass = Class.forName("net.kyori.adventure.audience.Audience");
+            audienceClass.getMethod("sendMessage", componentClass).invoke(player, component);
+            return true;
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            return false;
+        }
+    }
+
+    private static Object legacyComponent(String text) throws ReflectiveOperationException {
+        Class<?> componentClass = Class.forName("net.kyori.adventure.text.Component");
+        try {
+            Class<?> serializerClass = Class.forName("net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer");
+            Object serializer = serializerClass.getMethod("legacySection").invoke(null);
+            return serializer.getClass().getMethod("deserialize", String.class).invoke(serializer, text);
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            return componentClass.getMethod("text", String.class).invoke(null, text);
         }
     }
 

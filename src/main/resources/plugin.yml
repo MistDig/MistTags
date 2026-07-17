@@ -1,8 +1,8 @@
 name: MistTags
-version: 2.2-beta
+version: 2.3-beta
 main: com.mistdig.misttags.MistTags
 api-version: '1.19'
-description: Lightweight prefix/suffix tags with TAB/LPC/LuckPerms-safe display, PlaceholderAPI, animations, and YAML/database storage.
+description: Lightweight prefix/suffix tags with TAB/LPC/LuckPerms-safe display, PlaceholderAPI, animations, dialogs, and SQLite/MySQL storage.
 website: https://mistdig.github.io/MistTags/
 authors: [MistDig]
 
@@ -67,7 +67,7 @@ permissions:
     description: Set or remove your own prefix/suffix only (self-service, no access to other players)
     default: false
   misttags.reload:
-    description: Reload config.yml and animations.yml via /misttags reload (or /mt reload)
+    description: Reload config.yml, animations.yml, commands.yml, and msg.yml via /misttags reload (or /mt reload)
     default: op
   misttags.list:
     description: List active tags via /misttags list

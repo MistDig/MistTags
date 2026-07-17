@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Unified front door for the plugin: /misttags (alias /mt) with subcommands, so staff don't
@@ -30,6 +32,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
 
     private final MistTags plugin;
     private final TagCommand tagCommand;
+    private final Map<UUID, PreviewSession> previews = new ConcurrentHashMap<>();
 
     public MistTagsCommand(MistTags plugin, TagCommand tagCommand) {
         this.plugin = plugin;
@@ -54,6 +57,18 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
         }
         if (sub.equals("check")) {
             return handleCheck(sender, rest);
+        }
+        if (sub.equals("checktime")) {
+            return handleCheckTime(sender, rest);
+        }
+        if (sub.equals("editprefix") || sub.equals("editsuffix")) {
+            return handleEditSuggestion(sender, sub, rest);
+        }
+        if (sub.equals("setprefixraw") || sub.equals("setsuffixraw")) {
+            return handleDialogSave(sender, sub, rest);
+        }
+        if (sub.equals("noop")) {
+            return true;
         }
         if (sub.equals("stats")) {
             return handleStats(sender);
@@ -158,6 +173,109 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleCheckTime(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("misttags.check")) {
+            plugin.messages().send(sender, "no-permission");
+            return true;
+        }
+        if (args.length < 2) {
+            plugin.messages().send(sender, "usage-check");
+            return true;
+        }
+        PlayerTagData data = findData(args[0]);
+        if (data == null) {
+            plugin.messages().send(sender, "list-missing", Map.of("player", args[0]));
+            return true;
+        }
+        String type = args[1].equalsIgnoreCase("suffix") ? "suffix" : "prefix";
+        String stored = type.equals("prefix") ? data.getPrefix() : data.getSuffix();
+        long expireAt = type.equals("prefix") ? data.getPrefixExpire() : data.getSuffixExpire();
+        if (sender instanceof Player player && PaperDialogUtil.showTimeDialog(plugin, player, data, type)) return true;
+        plugin.messages().send(sender, "check-time", Map.of(
+                "player", data.getName(),
+                "type", type,
+                "time", timeLeft(stored, expireAt)
+        ));
+        return true;
+    }
+
+    private boolean handleEditSuggestion(CommandSender sender, String sub, String[] args) {
+        if (!(sender instanceof Player player)) {
+            plugin.messages().send(sender, "check-player-only");
+            return true;
+        }
+        if (!sender.hasPermission("misttags.check")) {
+            plugin.messages().send(sender, "no-permission");
+            return true;
+        }
+        if (args.length < 1) {
+            plugin.messages().send(sender, "usage-check");
+            return true;
+        }
+        String type = sub.equals("editprefix") ? "prefix" : "suffix";
+        PlayerTagData data = findData(args[0]);
+        if (data == null) {
+            plugin.messages().send(sender, "list-missing", Map.of("player", args[0]));
+            return true;
+        }
+        if (PaperDialogUtil.showEditDialog(plugin, player, data, type)) return true;
+        String command = "/mt add" + type + " " + args[0] + " 30m ";
+        ClickableMessageUtil.sendSuggestCommand(player, plugin.messages().prefix() + ChatColor.YELLOW
+                + "Click here to edit " + args[0] + "'s " + type + ".", command);
+        return true;
+    }
+
+    private boolean handleDialogSave(CommandSender sender, String sub, String[] args) {
+        if (!sender.hasPermission("misttags.check")) {
+            plugin.messages().send(sender, "no-permission");
+            return true;
+        }
+        if (args.length < 2) {
+            plugin.messages().send(sender, "usage-check");
+            return true;
+        }
+        PlayerTagData data = findData(args[0]);
+        if (data == null) {
+            plugin.messages().send(sender, "list-missing", Map.of("player", args[0]));
+            return true;
+        }
+
+        String type = sub.equals("setprefixraw") ? "prefix" : "suffix";
+        String durationStr = args[1];
+        boolean permanent = isPermanentDuration(durationStr);
+        java.time.Duration duration = permanent ? java.time.Duration.ZERO : DurationParser.parse(durationStr);
+        if (!permanent && (duration == null || duration.isZero() || duration.isNegative())) {
+            plugin.messages().send(sender, "invalid-duration");
+            return true;
+        }
+
+        long expireAt = permanent ? 0L : System.currentTimeMillis() + duration.toMillis();
+        String value = MiniMessageSanitizer.toSafeString(String.join(" ", Arrays.copyOfRange(args, 2, args.length)).trim());
+        if (value.isBlank()) {
+            if (type.equals("prefix")) data.clearPrefix(); else data.clearSuffix();
+        } else if (type.equals("prefix")) {
+            data.setPrefix(value, expireAt);
+        } else {
+            data.setSuffix(value, expireAt);
+        }
+        plugin.markDirty();
+        if (plugin.getDisplayManager() != null) plugin.getDisplayManager().refresh(data.getUuid());
+        String durationText = permanent ? "permanent" : "expires in " + DurationParser.describe(duration);
+        plugin.messages().send(sender, "set-tag", Map.of("type", type, "player", data.getName(), "expiry", durationText));
+        if (sender instanceof Player player) plugin.getTagManageMenu().open(player, data);
+        return true;
+    }
+
+    private boolean isPermanentDuration(String duration) {
+        if (duration == null) return false;
+        String normalized = duration.toLowerCase();
+        return normalized.equals("permanent")
+                || normalized.equals("perm")
+                || normalized.equals("forever")
+                || normalized.equals("never")
+                || normalized.equals("0");
+    }
+
     private boolean handleStats(CommandSender sender) {
         if (!sender.hasPermission("misttags.stats")) {
             plugin.messages().send(sender, "no-permission");
@@ -200,6 +318,12 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
+        if (args.length == 1 && args[0].equalsIgnoreCase("clear")) {
+            cancelPreview(player);
+            ActionBarUtil.send(player, "");
+            plugin.messages().send(sender, "preview-cleared");
+            return true;
+        }
         if (args.length < 1) {
             plugin.messages().send(sender, "usage-preview");
             return true;
@@ -215,15 +339,25 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
         final String preview = stored;
         // Per-player action bar loop, so this must run on whichever region owns this
         // player rather than a bare main-thread timer -- see MistTagsScheduler.
+        cancelPreview(player);
         var task = plugin.getScheduler().runForPlayerTimer(player, () ->
-                ActionBarUtil.send(player, plugin.renderStoredRaw(preview)), 0L, 20L);
+                ActionBarUtil.send(player, plugin.renderStoredRaw(preview)), 0L, 10L);
+        PreviewSession session = new PreviewSession(task);
+        previews.put(player.getUniqueId(), session);
         plugin.getScheduler().runGlobalDelayed(() -> {
-            plugin.getScheduler().cancel(task);
-            plugin.getScheduler().runForPlayer(player, () -> ActionBarUtil.send(player, ""));
+            if (!previews.remove(player.getUniqueId(), session)) return;
+            plugin.getScheduler().cancel(session.task());
+            var clearTask = plugin.getScheduler().runForPlayerTimer(player, () -> ActionBarUtil.send(player, ""), 0L, 5L);
+            plugin.getScheduler().runGlobalDelayed(() -> plugin.getScheduler().cancel(clearTask), 25L);
         }, 20L * 5L);
         plugin.getLogger().info(sender.getName() + " previewed MistTag '" + stored + "'.");
         plugin.messages().send(sender, "preview-started");
         return true;
+    }
+
+    private void cancelPreview(Player player) {
+        PreviewSession existing = previews.remove(player.getUniqueId());
+        if (existing != null) plugin.getScheduler().cancel(existing.task());
     }
 
     private PlayerTagData findData(String name) {
@@ -250,6 +384,17 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
 
     private String rendered(String value) {
         return value == null ? ChatColor.GRAY + "(none)" : MiniMessageSanitizer.toLegacy(plugin.renderStoredRaw(value));
+    }
+
+    private String timeLeft(String stored, long expireAt) {
+        if (stored == null) return "no active tag";
+        if (expireAt <= 0) return "permanent";
+        long millis = expireAt - System.currentTimeMillis();
+        if (millis <= 0) return "expired";
+        return DurationParser.describe(java.time.Duration.ofMillis(millis));
+    }
+
+    private record PreviewSession(MistTagsScheduler.Handle task) {
     }
 
     @Override

@@ -17,7 +17,7 @@ public class TagExpansion extends PlaceholderExpansion {
 
     @Override public String getAuthor() { return "MistDig"; }
     @Override public String getIdentifier() { return "misttags"; }
-    @Override public String getVersion() { return "2.2-beta"; }
+    @Override public String getVersion() { return "2.3-beta"; }
     @Override public boolean persist() { return true; }
 
     @Override
@@ -41,10 +41,10 @@ public class TagExpansion extends PlaceholderExpansion {
         };
 
         return switch (key) {
-            case "prefix" -> render(data.getPrefix());
-            case "suffix" -> render(data.getSuffix());
-            case "display_prefix" -> displayValue(player, data.getPrefix(), "%luckperms_prefix%");
-            case "display_suffix" -> displayValue(player, data.getSuffix(), "%luckperms_suffix%");
+            case "prefix" -> TagSpacingUtil.prefix(render(data.getPrefix()));
+            case "suffix" -> TagSpacingUtil.suffix(render(data.getSuffix()));
+            case "display_prefix" -> TagSpacingUtil.prefix(displayValue(player, data.getPrefix(), "%luckperms_prefix%"));
+            case "display_suffix" -> TagSpacingUtil.suffix(displayValue(player, data.getSuffix(), "%luckperms_suffix%"));
             case "prefix_raw" -> nullToEmpty(data.getPrefix());
             case "suffix_raw" -> nullToEmpty(data.getSuffix());
             case "prefix_plain" -> plain(render(data.getPrefix()));

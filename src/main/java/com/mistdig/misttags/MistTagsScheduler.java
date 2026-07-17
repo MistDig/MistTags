@@ -108,7 +108,12 @@ public final class MistTagsScheduler {
     }
 
     public void cancel(Handle task) {
-        if (task != null) task.cancel();
+        if (task == null) return;
+        try {
+            task.cancel();
+        } catch (RuntimeException e) {
+            plugin.getLogger().warning("Could not cancel scheduled task cleanly: " + e.getMessage());
+        }
     }
 
     private Object invokeGlobal(String method, Class<?>[] types, Object... args) {
@@ -143,6 +148,7 @@ public final class MistTagsScheduler {
     private Object invokeStatic(Class<?> type, String method, Class<?>[] types, Object... args) {
         try {
             Method m = type.getMethod(method, types);
+            m.setAccessible(true);
             return m.invoke(null, args);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Scheduler reflection failed: " + method, e);
@@ -152,6 +158,7 @@ public final class MistTagsScheduler {
     private Object invoke(Object target, String method, Class<?>[] types, Object... args) {
         try {
             Method m = target.getClass().getMethod(method, types);
+            m.setAccessible(true);
             return m.invoke(target, args);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Scheduler reflection failed: " + method, e);

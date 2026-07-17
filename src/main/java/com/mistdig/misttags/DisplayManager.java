@@ -123,8 +123,8 @@ public class DisplayManager implements Listener {
     private void applyTab(Player player) {
         if (tabBridge == null || !tabBridge.isAvailable()) return;
         PlayerTagData data = plugin.getData(player.getUniqueId());
-        String prefix = resolvePlain(data == null ? null : data.getPrefix());
-        String suffix = resolvePlain(data == null ? null : data.getSuffix());
+        String prefix = TagSpacingUtil.prefix(resolvePlain(data == null ? null : data.getPrefix()));
+        String suffix = TagSpacingUtil.suffix(resolvePlain(data == null ? null : data.getSuffix()));
         String nameColor = TagColorUtil.colorTagForMiniMessage(data == null ? null : resolveRaw(data.getPrefix()));
         tabBridge.apply(player, prefix + nameColor, suffix);
     }
@@ -138,8 +138,8 @@ public class DisplayManager implements Listener {
         Team team = board.getTeam(name);
         if (team == null) team = board.registerNewTeam(name);
 
-        team.setPrefix(limitTeamPart(resolveLegacy(data == null ? null : data.getPrefix())));
-        team.setSuffix(limitTeamPart(resolveLegacy(data == null ? null : data.getSuffix())));
+        team.setPrefix(limitTeamPart(TagSpacingUtil.prefix(resolveLegacy(data == null ? null : data.getPrefix()))));
+        team.setSuffix(limitTeamPart(TagSpacingUtil.suffix(resolveLegacy(data == null ? null : data.getSuffix()))));
         ChatColor color = TagColorUtil.deriveLastColor(data == null ? null : resolveRaw(data.getPrefix()));
         if (color != null) {
             try {

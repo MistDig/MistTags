@@ -67,21 +67,29 @@ integrations:
     # LPC's chat-format so chat follows the same MistTags-then-LuckPerms behavior.
     enabled: true
 
-# How often (seconds) the in-memory tag cache is flushed to data.yml. Lower = safer against
-# crashes, higher = less disk I/O. A final save always happens on shutdown regardless.
+# How often (seconds) the in-memory tag cache is flushed to the database. Lower = safer
+# against crashes, higher = less disk I/O. A final save always happens on shutdown regardless.
 save-interval-seconds: 10
 
-database:
-  # false = store normal player tag data in data.yml.
-  # true  = ignore data.yml and store player tag data through JDBC instead.
-  enabled: false
+storage:
+  # SQLite is the default. MistTags no longer uses data.yml for game storage.
+  # Existing data.yml files are imported into the database once, then left as backups.
+  #
+  # Options:
+  # sqlite - stores data in plugins/MistTags/misttags.db by default.
+  # mysql  - stores data in MySQL/MariaDB using the settings below.
+  type: sqlite
 
-  # SQLite is the default and writes plugins/MistTags/misttags.db.
-  # For MySQL/MariaDB, use a JDBC URL like:
-  # jdbc:mysql://127.0.0.1:3306/misttags?useSSL=false&characterEncoding=utf8
-  url: ""
-  username: ""
-  password: ""
+  sqlite:
+    file: misttags.db
+
+  mysql:
+    host: 127.0.0.1
+    port: 3306
+    database: misttags
+    username: ""
+    password: ""
+    use-ssl: false
 
 # Emojis/symbols are not whitelisted. Any Unicode emoji can be used in a prefix/suffix
 # as long as the server/client/display plugin can render it. If using MySQL, make sure

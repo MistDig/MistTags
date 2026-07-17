@@ -34,7 +34,6 @@ public class MistTags extends JavaPlugin implements Listener {
     // which is what makes it safe for other plugins to query from arbitrary threads.
     private final Map<UUID, PlayerTagData> playerCache = new ConcurrentHashMap<>();
 
-    private File dataFile;
     private File activityFile;
     private final AtomicBoolean dirty = new AtomicBoolean(false);
     private final Object storageLock = new Object();
@@ -47,6 +46,7 @@ public class MistTags extends JavaPlugin implements Listener {
     private MistTagsScheduler scheduler;
     private MessageManager messageManager;
     private TagManageMenu tagManageMenu;
+    private CommandAliasManager commandAliasManager;
 
     // Plugins that count as "already owning" prefix/suffix display when display.mode is
     // "auto". Overridable via display.known-display-plugins in config.yml.
@@ -60,6 +60,7 @@ public class MistTags extends JavaPlugin implements Listener {
         saveDefaultConfig();
         createAnimationConfig();
         createPlaceholderList();
+        createCommandConfig();
         messageManager = new MessageManager(this);
         validateStartupConfigs();
         loadAnimations();
@@ -68,8 +69,11 @@ public class MistTags extends JavaPlugin implements Listener {
         scheduler = new MistTagsScheduler(this);
         tagManageMenu = new TagManageMenu(this);
         activityFile = new File(getDataFolder(), "active-tags.txt");
+        commandAliasManager = new CommandAliasManager(this);
+        commandAliasManager.load();
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(tagManageMenu, this);
+        Bukkit.getPluginManager().registerEvents(commandAliasManager, this);
 
         boolean tabPresent = Bukkit.getPluginManager().getPlugin("TAB") != null;
         boolean placeholderApiPresent = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
@@ -166,6 +170,11 @@ public class MistTags extends JavaPlugin implements Listener {
         if (!file.exists()) saveResource("placeholders.txt", false);
     }
 
+    private void createCommandConfig() {
+        File file = new File(getDataFolder(), "commands.yml");
+        if (!file.exists()) saveResource("commands.yml", false);
+    }
+
     public void loadAnimations() {
         animations.clear();
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "animations.yml"));
@@ -238,7 +247,7 @@ public class MistTags extends JavaPlugin implements Listener {
     /**
      * Backs /misttags reload. Reloads config.yml and animations.yml and re-derives
      * everything sourced from them (duration tiers/cooldown/policy, display mode) without
-     * a server restart. Deliberately does NOT touch playerCache/data.yml -- active tags
+     * a server restart. Deliberately does NOT touch playerCache/database state -- active tags
      * should survive a reload untouched.
      *
      * save-interval-seconds is the one config value this can't apply live, since the async
@@ -253,6 +262,8 @@ public class MistTags extends JavaPlugin implements Listener {
         messageManager.reload();
         createAnimationConfig();
         createPlaceholderList();
+        createCommandConfig();
+        if (commandAliasManager != null) commandAliasManager.load();
         loadAnimations();
         customTagPolicy = new CustomTagPolicy(this);
 
@@ -288,21 +299,27 @@ public class MistTags extends JavaPlugin implements Listener {
     // ----- Persistence -----
 
     private void loadDataConfig() {
-        databaseEnabled = getConfig().getBoolean("database.enabled", false);
-        if (databaseEnabled) {
-            loadDatabase();
-            return;
+        databaseEnabled = true;
+        loadDatabase();
+    }
+
+    private int importDataYmlIfPresent() {
+        File oldDataFile = new File(getDataFolder(), "data.yml");
+        if (!oldDataFile.isFile()) return 0;
+        int before = playerCache.size();
+        loadLegacyDataYml(oldDataFile);
+        int imported = Math.max(0, playerCache.size() - before);
+        if (imported > 0) {
+            getLogger().info("Imported " + imported + " player record(s) from legacy data.yml into database storage.");
+            markDirty();
+            saveDatabase();
         }
-        dataFile = new File(getDataFolder(), "data.yml");
-        if (!dataFile.exists()) {
-            try {
-                getDataFolder().mkdirs();
-                dataFile.createNewFile();
-            } catch (IOException e) {
-                getLogger().severe("Failed to create data.yml: " + e.getMessage());
-            }
-        }
-        FileConfiguration cfg = YamlConfiguration.loadConfiguration(dataFile);
+        getLogger().info("Legacy data.yml is no longer used for game storage. Keeping it in place as a backup.");
+        return imported;
+    }
+
+    private void loadLegacyDataYml(File file) {
+        FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
         if (!cfg.contains("players")) return;
         for (String uuidStr : cfg.getConfigurationSection("players").getKeys(false)) {
             try {
@@ -319,7 +336,7 @@ public class MistTags extends JavaPlugin implements Listener {
                 data.setLastCustomPrefixChange(cfg.getLong(path + "last-custom-prefix-change", 0));
                 data.setLastCustomSuffixChange(cfg.getLong(path + "last-custom-suffix-change", 0));
                 data.setLastSeen(cfg.getLong(path + "last-seen", 0));
-                playerCache.put(uuid, data);
+                playerCache.putIfAbsent(uuid, data);
             } catch (IllegalArgumentException ex) {
                 getLogger().warning("Skipping malformed UUID key in data.yml: " + uuidStr);
             }
@@ -327,53 +344,12 @@ public class MistTags extends JavaPlugin implements Listener {
     }
 
     /**
-     * Builds a fresh YamlConfiguration from the in-memory cache and writes it to disk.
-     * Building the snapshot only touches plain data (no Bukkit API calls), which is what
-     * makes it safe to run from the async scheduler thread as well as from onDisable().
+     * Flushes the in-memory cache to database storage. YAML game storage was removed:
+     * data.yml may be imported as a legacy backup, but it is no longer written.
      */
     private void flushIfDirty() {
         if (!dirty.compareAndSet(true, false)) return;
-        if (databaseEnabled) {
-            saveDatabase();
-            writeActivityFile();
-            return;
-        }
-
-        YamlConfiguration cfg = new YamlConfiguration();
-        for (PlayerTagData data : playerCache.values()) {
-            boolean hasCooldownToTrack = data.getLastCustomPrefixChange() > 0 || data.getLastCustomSuffixChange() > 0;
-            // Still skip players with no active tags AND no self-service cooldown to remember,
-            // to avoid bloating the file -- but a self-service cooldown must survive even
-            // after the tag it came from expires/gets removed, or a restart would let a
-            // player bypass custom.cooldown-seconds by waiting for expiry then re-logging.
-            if (data.isEmpty() && !hasCooldownToTrack) continue;
-            String path = "players." + data.getUuid() + ".";
-            cfg.set(path + "name", data.getName());
-            if (data.getPrefix() != null) {
-                cfg.set(path + "prefix", data.getPrefix());
-                cfg.set(path + "prefix-expire", data.getPrefixExpire());
-            }
-            if (data.getSuffix() != null) {
-                cfg.set(path + "suffix", data.getSuffix());
-                cfg.set(path + "suffix-expire", data.getSuffixExpire());
-            }
-            if (data.getLastCustomPrefixChange() > 0) {
-                cfg.set(path + "last-custom-prefix-change", data.getLastCustomPrefixChange());
-            }
-            if (data.getLastCustomSuffixChange() > 0) {
-                cfg.set(path + "last-custom-suffix-change", data.getLastCustomSuffixChange());
-            }
-            if (data.getLastSeen() > 0) {
-                cfg.set(path + "last-seen", data.getLastSeen());
-            }
-        }
-
-        try {
-            cfg.save(dataFile);
-        } catch (IOException e) {
-            getLogger().severe("Could not save data.yml: " + e.getMessage());
-            dirty.set(true); // retry on the next cycle instead of silently losing the write
-        }
+        saveDatabase();
         writeActivityFile();
     }
 
@@ -424,6 +400,9 @@ public class MistTags extends JavaPlugin implements Listener {
         File animationsFile = new File(getDataFolder(), "animations.yml");
         FileConfiguration animationsCfg = YamlConfiguration.loadConfiguration(animationsFile);
         validateSection("animations.yml", animationsCfg, List.of("animations"));
+        File commandsFile = new File(getDataFolder(), "commands.yml");
+        FileConfiguration commandsCfg = YamlConfiguration.loadConfiguration(commandsFile);
+        validateSection("commands.yml", commandsCfg, List.of("commands"));
     }
 
     private void validateSection(String fileName, FileConfiguration cfg, List<String> requiredSections) {
@@ -437,11 +416,9 @@ public class MistTags extends JavaPlugin implements Listener {
     private void loadDatabase() {
         try {
             getDataFolder().mkdirs();
-            String defaultUrl = "jdbc:sqlite:" + new File(getDataFolder(), "misttags.db").getAbsolutePath();
-            String url = getConfig().getString("database.url", defaultUrl);
-            if (url == null || url.isBlank()) url = defaultUrl;
-            String user = getConfig().getString("database.username", "");
-            String password = getConfig().getString("database.password", "");
+            String url = storageUrl();
+            String user = storageUsername();
+            String password = storagePassword();
             loadJdbcDriver(url);
             databaseConnection = user.isEmpty() ? DriverManager.getConnection(url) : DriverManager.getConnection(url, user, password);
             try (Statement st = databaseConnection.createStatement()) {
@@ -474,11 +451,52 @@ public class MistTags extends JavaPlugin implements Listener {
                     playerCache.put(uuid, data);
                 }
             }
-            getLogger().info("Database storage enabled. data.yml will be ignored.");
+            if (playerCache.isEmpty()) importDataYmlIfPresent();
+            getLogger().info("Storage active: " + storageTypeName(url) + ". data.yml is not used for game storage.");
         } catch (SQLException | IllegalArgumentException e) {
             getLogger().severe("Database startup failed: " + e.getMessage());
-            getLogger().severe("MistTags will keep running in memory for this session, but data.yml is still ignored because database.enabled is true.");
+            getLogger().severe("MistTags will keep running in memory for this session, but data.yml is still ignored because database storage is required.");
         }
+    }
+
+    private String storageUrl() {
+        String legacyUrl = getConfig().getString("database.url", "");
+        if (legacyUrl != null && !legacyUrl.isBlank()) return legacyUrl;
+
+        String type = getConfig().getString("storage.type", "sqlite").toLowerCase();
+        if (type.equals("mysql") || type.equals("mariadb")) {
+            String host = getConfig().getString("storage.mysql.host", "127.0.0.1");
+            int port = getConfig().getInt("storage.mysql.port", 3306);
+            String database = getConfig().getString("storage.mysql.database", "misttags");
+            boolean ssl = getConfig().getBoolean("storage.mysql.use-ssl", false);
+            return "jdbc:mysql://" + host + ":" + port + "/" + database
+                    + "?useSSL=" + ssl + "&characterEncoding=utf8&useUnicode=true";
+        }
+
+        String fileName = getConfig().getString("storage.sqlite.file", "misttags.db");
+        if (fileName == null || fileName.isBlank()) fileName = "misttags.db";
+        File file = new File(fileName);
+        if (!file.isAbsolute()) file = new File(getDataFolder(), fileName);
+        return "jdbc:sqlite:" + file.getAbsolutePath();
+    }
+
+    private String storageUsername() {
+        String legacy = getConfig().getString("database.username", "");
+        if (legacy != null && !legacy.isBlank()) return legacy;
+        return getConfig().getString("storage.mysql.username", "");
+    }
+
+    private String storagePassword() {
+        String legacy = getConfig().getString("database.password", "");
+        if (legacy != null && !legacy.isBlank()) return legacy;
+        return getConfig().getString("storage.mysql.password", "");
+    }
+
+    private String storageTypeName(String url) {
+        if (url.startsWith("jdbc:sqlite:")) return "SQLite (" + url.substring("jdbc:sqlite:".length()) + ")";
+        if (url.startsWith("jdbc:mysql:")) return "MySQL";
+        if (url.startsWith("jdbc:mariadb:")) return "MariaDB";
+        return "JDBC";
     }
 
     private void loadJdbcDriver(String url) {

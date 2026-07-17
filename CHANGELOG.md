@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.3-beta
+
+- Added Paper Dialog UI support for `/mt check <player>` on supported Paper/26.x servers.
+- Added dialog editing with separate tag and duration inputs.
+- Added Back buttons for time dialogs.
+- Added `commands.yml` for custom command aliases that route to the same MistTags actions.
+- Switched normal game storage to SQLite by default and stopped writing `data.yml`.
+- Added display-only spacing so prefixes do not merge into names and suffixes do not attach to names.
+- Improved clickable `/mt list` rows and Adventure color handling.
+- Fixed preview cleanup to last 5 seconds and clear reliably.
+- Added safer scheduler cancellation for Paper/Folia task handles.
+
 ## 2.2-beta
 
 - Added `/mt check <player>` staff manage menu.

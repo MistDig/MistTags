@@ -65,6 +65,6 @@ Remove the test prefix:
 
 ## Storage
 
-By default, player tag data is stored in `plugins/MistTags/data.yml`.
+By default, player tag data is stored in `plugins/MistTags/misttags.db` using SQLite.
 
-If `database.enabled: true`, MistTags ignores `data.yml` and uses SQLite/MySQL through JDBC instead.
+Legacy `data.yml` files are imported once if the database is empty, then kept as backups. MistTags no longer writes `data.yml` for game storage.

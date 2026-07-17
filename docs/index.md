@@ -22,5 +22,5 @@ features:
   - title: Staff-controlled tags
     details: Add temporary or permanent prefixes and suffixes without replacing a player's normal LuckPerms rank unless a MistTags tag is active.
   - title: Server-friendly storage
-    details: Use data.yml by default, or enable SQLite/MySQL for database-backed installs.
+    details: Use SQLite by default, or switch to MySQL/MariaDB for larger installs.
 ---

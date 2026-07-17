@@ -33,6 +33,7 @@ This means:
 - A player with a MistTags prefix shows the MistTags prefix.
 - A player without a MistTags prefix falls back to LuckPerms.
 - Removing the MistTags prefix restores the normal LuckPerms display.
+- Prefix placeholders include one trailing display space when not empty. Suffix placeholders include one leading display space when not empty.
 
 ## LPC
 

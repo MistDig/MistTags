@@ -54,12 +54,29 @@ Use an animation from `animations.yml` by writing `anim:<id>`.
 It shows:
 
 - rendered prefix and suffix
-- raw saved prefix and suffix
-- time left or permanent status
-- delete buttons
-- edit buttons that paste the correct edit command into chat
+- delete prefix/suffix buttons
+- edit prefix/suffix buttons
+- prefix/suffix time buttons
+
+On Paper builds with Dialog UI support, MistTags opens a native dialog. Edit dialogs include both the tag text and duration, so edits do not silently become permanent.
 
 Rows in `/mt list` are clickable for players and open the same menu.
+
+## Custom Command Aliases
+
+`plugins/MistTags/commands.yml` can add extra command names while keeping the same MistTags behavior.
+
+```yaml
+commands:
+  misttags:
+    target: "misttags"
+    aliases:
+      - "misttags"
+      - "mt"
+      - "tags"
+```
+
+With that example, `/tags list` acts like `/mt list`.
 
 ## Permissions
 
