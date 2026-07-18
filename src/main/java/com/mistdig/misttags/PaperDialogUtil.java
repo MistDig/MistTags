@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -22,6 +23,10 @@ public final class PaperDialogUtil {
 
     public static boolean showTimeDialog(MistTags plugin, Player player, PlayerTagData data, String type) {
         return showDialog(plugin, player, () -> createDialog(buildTimeBase(data, type), buildTimeType(data)));
+    }
+
+    public static boolean showAnimationDialog(MistTags plugin, Player player, PlayerTagData data, String type) {
+        return showDialog(plugin, player, () -> createDialog(buildAnimationBase(plugin, data, type), buildAnimationType(plugin, data, type)));
     }
 
     private static boolean showDialog(MistTags plugin, Player player, DialogSupplier supplier) {
@@ -110,6 +115,34 @@ public final class PaperDialogUtil {
         Object close = runButton("Close", "Close this dialog", "mt noop");
         return dialogTypeClass.getMethod("confirmation", actionButtonClass(), actionButtonClass())
                 .invoke(null, back, close);
+    }
+
+    private static Object buildAnimationBase(MistTags plugin, PlayerTagData data, String type) throws ReflectiveOperationException {
+        String stored = type.equals("prefix") ? data.getPrefix() : data.getSuffix();
+        List<Object> body = List.of(
+                plainBody(text("Choose an animation for this " + type + "."), 300),
+                plainBody(mini("Current: " + renderedMini(plugin, stored)), 300)
+        );
+        Object builder = dialogBaseBuilder("Animate " + capitalize(type), body, List.of());
+        return builder.getClass().getMethod("build").invoke(builder);
+    }
+
+    private static Object buildAnimationType(MistTags plugin, PlayerTagData data, String type) throws ReflectiveOperationException {
+        Class<?> dialogTypeClass = Class.forName("io.papermc.paper.registry.data.dialog.type.DialogType");
+        String commandPrefix = "mt set" + type + "anim " + data.getName() + " ";
+        List<Object> actions = new ArrayList<>();
+        actions.add(runButton("None", "Keep this " + type + " without animation", commandPrefix + "none"));
+        plugin.getAnimations().keySet().stream()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .forEach(id -> {
+                    try {
+                        actions.add(runButton(id, "Use anim:" + id, commandPrefix + id));
+                    } catch (ReflectiveOperationException e) {
+                        throw new IllegalStateException(e);
+                    }
+                });
+        return dialogTypeClass.getMethod("multiAction", List.class, actionButtonClass(), int.class)
+                .invoke(null, actions, null, 2);
     }
 
     private static Object dialogBaseBuilder(String title, List<Object> body, List<Object> inputs) throws ReflectiveOperationException {

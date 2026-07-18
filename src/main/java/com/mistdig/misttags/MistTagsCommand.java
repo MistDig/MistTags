@@ -67,6 +67,9 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
         if (sub.equals("setprefixraw") || sub.equals("setsuffixraw")) {
             return handleDialogSave(sender, sub, rest);
         }
+        if (sub.equals("setprefixanim") || sub.equals("setsuffixanim")) {
+            return handleDialogAnimation(sender, sub, rest);
+        }
         if (sub.equals("noop")) {
             return true;
         }
@@ -268,8 +271,69 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
         if (plugin.getDisplayManager() != null) plugin.getDisplayManager().refresh(data.getUuid());
         String durationText = permanent ? "permanent" : "expires in " + DurationParser.describe(duration);
         plugin.messages().send(sender, "set-tag", Map.of("type", type, "player", data.getName(), "expiry", durationText));
+        if (sender instanceof Player player) {
+            if (!value.isBlank() && AnimationSpec.parse(value) == null
+                    && PaperDialogUtil.showAnimationDialog(plugin, player, data, type)) {
+                return true;
+            }
+            plugin.getTagManageMenu().open(player, data);
+        }
+        return true;
+    }
+
+    private boolean handleDialogAnimation(CommandSender sender, String sub, String[] args) {
+        if (!sender.hasPermission("misttags.check")) {
+            plugin.messages().send(sender, "no-permission");
+            return true;
+        }
+        if (args.length < 2) {
+            plugin.messages().send(sender, "usage-check");
+            return true;
+        }
+        PlayerTagData data = findData(args[0]);
+        if (data == null) {
+            plugin.messages().send(sender, "list-missing", Map.of("player", args[0]));
+            return true;
+        }
+
+        String type = sub.equals("setprefixanim") ? "prefix" : "suffix";
+        String selected = args[1].toLowerCase();
+        String stored = type.equals("prefix") ? data.getPrefix() : data.getSuffix();
+        long expireAt = type.equals("prefix") ? data.getPrefixExpire() : data.getSuffixExpire();
+        if (stored == null || stored.isBlank()) {
+            plugin.messages().send(sender, "no-active-tag", Map.of("player", data.getName(), "type", type));
+            if (sender instanceof Player player) plugin.getTagManageMenu().open(player, data);
+            return true;
+        }
+
+        String text = animationText(stored);
+        if (selected.equals("none")) {
+            if (type.equals("prefix")) data.setPrefix(text, expireAt); else data.setSuffix(text, expireAt);
+        } else {
+            if (!plugin.getAnimations().containsKey(selected)) {
+                plugin.messages().send(sender, "animation-missing", Map.of("animation", selected));
+                if (sender instanceof Player player) PaperDialogUtil.showAnimationDialog(plugin, player, data, type);
+                return true;
+            }
+            String animated = new AnimationSpec(selected, text).store();
+            if (type.equals("prefix")) data.setPrefix(animated, expireAt); else data.setSuffix(animated, expireAt);
+        }
+
+        plugin.markDirty();
+        if (plugin.getDisplayManager() != null) plugin.getDisplayManager().refresh(data.getUuid());
+        plugin.messages().send(sender, "set-tag", Map.of(
+                "type", type,
+                "player", data.getName(),
+                "expiry", selected.equals("none") ? "without animation" : "using anim:" + selected
+        ));
         if (sender instanceof Player player) plugin.getTagManageMenu().open(player, data);
         return true;
+    }
+
+    private String animationText(String stored) {
+        AnimationSpec spec = AnimationSpec.parse(stored);
+        if (spec != null) return MiniMessageSanitizer.plainText(spec.text());
+        return MiniMessageSanitizer.plainText(plugin.renderStoredRaw(stored));
     }
 
     private boolean isPermanentDuration(String duration) {
