@@ -335,12 +335,13 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         String stored = MiniMessageSanitizer.toSafeString(String.join(" ", args));
-        if (stored.toLowerCase().startsWith("anim:")) {
-            String animId = stored.substring(5).toLowerCase();
-            if (!plugin.getAnimations().containsKey(animId)) {
-                plugin.messages().send(sender, "animation-missing", Map.of("animation", animId));
+        AnimationSpec animationSpec = AnimationSpec.fromInput(stored);
+        if (animationSpec != null) {
+            if (!plugin.getAnimations().containsKey(animationSpec.id())) {
+                plugin.messages().send(sender, "animation-missing", Map.of("animation", animationSpec.id()));
                 return true;
             }
+            stored = animationSpec.store();
         }
         final String preview = stored;
         // Per-player action bar loop, so this must run on whichever region owns this

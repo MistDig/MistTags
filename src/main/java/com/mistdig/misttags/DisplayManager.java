@@ -163,12 +163,7 @@ public class DisplayManager implements Listener {
     }
 
     private String resolveRaw(String stored) {
-        if (stored == null) return "";
-        if (stored.toLowerCase().startsWith("anim:")) {
-            AnimationData anim = plugin.getAnimations().get(stored.substring(5).toLowerCase());
-            return anim == null ? "" : anim.getCurrentFrame();
-        }
-        return stored;
+        return plugin.renderStoredRaw(stored);
     }
 
     private String teamName(UUID uuid) {

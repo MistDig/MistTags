@@ -17,7 +17,7 @@ public class TagExpansion extends PlaceholderExpansion {
 
     @Override public String getAuthor() { return "MistDig"; }
     @Override public String getIdentifier() { return "misttags"; }
-    @Override public String getVersion() { return "2.3.1-beta"; }
+    @Override public String getVersion() { return "2.3.2-beta"; }
     @Override public boolean persist() { return true; }
 
     @Override
@@ -85,12 +85,7 @@ public class TagExpansion extends PlaceholderExpansion {
     }
 
     private String render(String stored) {
-        if (stored == null) return "";
-        if (stored.toLowerCase().startsWith("anim:")) {
-            AnimationData anim = plugin.getAnimations().get(stored.substring(5).toLowerCase());
-            return anim != null ? anim.getCurrentFrame() : "";
-        }
-        return stored;
+        return plugin.renderStoredRaw(stored);
     }
 
     private String nullToEmpty(String value) {

@@ -215,9 +215,10 @@ public class MistTags extends JavaPlugin implements Listener {
 
     public String renderStoredRaw(String stored) {
         if (stored == null) return "";
-        if (stored.toLowerCase().startsWith("anim:")) {
-            AnimationData anim = animations.get(stored.substring(5).toLowerCase());
-            return anim == null ? "" : anim.getCurrentFrame();
+        AnimationSpec spec = AnimationSpec.parse(stored);
+        if (spec != null) {
+            AnimationData anim = animations.get(spec.id());
+            return anim == null ? "" : anim.getCurrentFrame(spec.text());
         }
         return stored;
     }

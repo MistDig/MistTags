@@ -16,3 +16,12 @@ animations:
       - "<red><bold>[STAFF]</bold></red> "
       - "<white><bold>[STAFF]</bold></white> "
       - "<red><bold>[STAFF]</bold></red> "
+  gradient_chroma:
+    update-ticks: 4 # Template animation; use /mt addprefix Player 30m anim:gradient_chroma VIP
+    frames:
+      - "<gradient:#ff5555:#ffaa00>{text}</gradient>"
+      - "<gradient:#ffaa00:#ffff55>{text}</gradient>"
+      - "<gradient:#ffff55:#55ff55>{text}</gradient>"
+      - "<gradient:#55ff55:#55ffff>{text}</gradient>"
+      - "<gradient:#55ffff:#5555ff>{text}</gradient>"
+      - "<gradient:#5555ff:#ff55ff>{text}</gradient>"

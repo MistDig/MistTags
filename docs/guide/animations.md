@@ -10,6 +10,20 @@ Use it in-game with:
 /mt preview anim:rainbow_vip
 ```
 
+Template animations can use `{text}` in their frames. Then staff can provide the displayed text from the command:
+
+```text
+/mt addprefix MistDig 1m anim:gradient_chroma VIP
+/mt addsuffix MistDig 1m anim:gradient_chroma IMMORTAL
+/mt preview anim:gradient_chroma BUTTER
+```
+
+MistTags also accepts the colon form:
+
+```text
+/mt addprefix MistDig 1m anim:gradient_chroma:VIP
+```
+
 MistTags accepts safe MiniMessage color names such as `red`, `gold`, `yellow`, `green`, `aqua`, `blue`, `light_purple`, `white`, `gray`, `dark_gray`, `dark_red`, `dark_green`, `dark_aqua`, `dark_blue`, and `dark_purple`.
 
 ## Simple Color Animations
@@ -379,10 +393,10 @@ animations:
   gradient_chroma:
     update-ticks: 4
     frames:
-      - "<gradient:#ff5555:#ffaa00>[CHROMA]</gradient>"
-      - "<gradient:#ffaa00:#ffff55>[CHROMA]</gradient>"
-      - "<gradient:#ffff55:#55ff55>[CHROMA]</gradient>"
-      - "<gradient:#55ff55:#55ffff>[CHROMA]</gradient>"
-      - "<gradient:#55ffff:#5555ff>[CHROMA]</gradient>"
-      - "<gradient:#5555ff:#ff55ff>[CHROMA]</gradient>"
+      - "<gradient:#ff5555:#ffaa00>{text}</gradient>"
+      - "<gradient:#ffaa00:#ffff55>{text}</gradient>"
+      - "<gradient:#ffff55:#55ff55>{text}</gradient>"
+      - "<gradient:#55ff55:#55ffff>{text}</gradient>"
+      - "<gradient:#55ffff:#5555ff>{text}</gradient>"
+      - "<gradient:#5555ff:#ff55ff>{text}</gradient>"
 ```

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3.2-beta
+
+- Added template animation support using `{text}` in `animations.yml` frames.
+- Added command syntax such as `/mt addprefix MistDig 1m anim:gradient_chroma VIP`.
+- Added default `gradient_chroma` template animation.
+
 ## 2.3.1-beta
 
 - Fixed `/mt` help and tab completion so players only see commands they have permission to use.

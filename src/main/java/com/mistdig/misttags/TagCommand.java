@@ -84,7 +84,8 @@ public class TagCommand implements CommandExecutor, TabCompleter {
         String targetName = args[0];
         String durationStr = args[1];
         String tagValue = String.join(" ", Arrays.copyOfRange(args, 2, args.length)).trim();
-        boolean isAnimation = tagValue.toLowerCase().startsWith("anim:");
+        AnimationSpec animationSpec = AnimationSpec.fromInput(tagValue);
+        boolean isAnimation = animationSpec != null;
         String type = label.equalsIgnoreCase("addprefix") ? "prefix" : "suffix";
 
         // Self-service: a player using misttags.custom on themselves rather than staff acting
@@ -99,11 +100,11 @@ public class TagCommand implements CommandExecutor, TabCompleter {
                 plugin.messages().send(sender, "self-animated-denied");
                 return true;
             }
-            String animId = tagValue.substring(5).toLowerCase();
-            if (!plugin.getAnimations().containsKey(animId)) {
-                plugin.messages().send(sender, "animation-missing", Map.of("animation", animId));
+            if (!plugin.getAnimations().containsKey(animationSpec.id())) {
+                plugin.messages().send(sender, "animation-missing", Map.of("animation", animationSpec.id()));
                 return true;
             }
+            tagValue = animationSpec.store();
         } else {
             // Strip any non-cosmetic MiniMessage tags (click/hover/insertion, etc.) up front
             // so the sender gets immediate feedback rather than a silently-modified value later.

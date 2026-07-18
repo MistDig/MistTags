@@ -35,12 +35,7 @@ public class ChatListener implements Listener {
     }
 
     private String renderRaw(String stored) {
-        if (stored == null) return "";
-        if (stored.toLowerCase().startsWith("anim:")) {
-            AnimationData anim = plugin.getAnimations().get(stored.substring(5).toLowerCase());
-            return anim == null ? "" : anim.getCurrentFrame();
-        }
-        return stored;
+        return plugin.renderStoredRaw(stored);
     }
 
     private String escapeFormat(String value) {

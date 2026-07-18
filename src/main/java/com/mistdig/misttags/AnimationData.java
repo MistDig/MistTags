@@ -35,6 +35,15 @@ public class AnimationData {
         return frames.get(currentFrameIndex);
     }
 
+    public String getCurrentFrame(String text) {
+        String frame = getCurrentFrame();
+        text = text == null ? "" : text;
+        return frame
+                .replace("{text}", text)
+                .replace("{tag}", text)
+                .replace("{value}", text);
+    }
+
     public int getFrameCount() {
         return frames.size();
     }

@@ -47,6 +47,13 @@ Use an animation from `animations.yml` by writing `anim:<id>`.
 /mt addsuffix Alex perm anim:pulse
 ```
 
+Template animations can use `{text}` in `animations.yml`, then the command supplies the text:
+
+```text
+/mt addprefix MistDig 1m anim:gradient_chroma VIP
+/mt addsuffix MistDig 1m anim:gradient_chroma IMMORTAL
+```
+
 ## Manage Menu
 
 `/mt check <player>` opens the staff manage menu.
