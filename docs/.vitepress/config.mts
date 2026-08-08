@@ -44,7 +44,7 @@ export default defineConfig({
     ],
     footer: {
       message: 'Released as a beta build. Test on your server before using in production.',
-      copyright: 'Copyright © 2026 MistDig'
+      copyright: 'Copyright (c) 2026 MistDig'
     }
   }
 })

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.3-beta
+
+- Added the Paper Dialog animation picker after staff edit a prefix or suffix.
+- Made every animation preset in the docs use `{text}` so copied examples work as templates.
+- Updated version metadata for the next beta build.
+- Kept public release naming focused on `MistTags` for Modrinth compliance.
+
 ## 2.3.2-beta
 
 - Added template animation support using `{text}` in `animations.yml` frames.

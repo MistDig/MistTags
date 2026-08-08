@@ -17,7 +17,7 @@ public class TagExpansion extends PlaceholderExpansion {
 
     @Override public String getAuthor() { return "MistDig"; }
     @Override public String getIdentifier() { return "misttags"; }
-    @Override public String getVersion() { return "2.3.2-beta"; }
+    @Override public String getVersion() { return plugin.getDescription().getVersion(); }
     @Override public boolean persist() { return true; }
 
     @Override
