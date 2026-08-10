@@ -69,7 +69,7 @@ public final class TagManageMenu implements Listener {
         if (!(event.getInventory().getHolder() instanceof Holder holder)) return;
         event.setCancelled(true);
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        if (!player.hasPermission("misttags.manage")) {
+        if (!hasStaffPermission(player)) {
             plugin.messages().send(player, "no-permission");
             return;
         }
@@ -167,6 +167,14 @@ public final class TagManageMenu implements Listener {
         if (plugin.getDisplayManager() != null) {
             plugin.getDisplayManager().refresh(data.getUuid());
         }
+    }
+
+    private boolean hasStaffPermission(Player player) {
+        return player.hasPermission("misttags.check")
+                || player.hasPermission("misttags.manage")
+                || player.hasPermission("misttags.admin")
+                || player.hasPermission("misttags.*")
+                || player.hasPermission("*");
     }
 
     private record MenuTarget(UUID uuid, String name) {

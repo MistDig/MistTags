@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3.4-beta
+
+- Fixed broad staff permissions so `misttags.manage`, `misttags.admin`, and `misttags.*` work across commands, tab completion, and the manage GUI.
+- Added `misttags.admin` and `misttags.*` permission declarations.
+- Added docs for using TAB animation placeholders, such as `%animation:sovereign%`, through LuckPerms fallback prefixes.
+
 ## 2.3.3-beta
 
 - Added the Paper Dialog animation picker after staff edit a prefix or suffix.

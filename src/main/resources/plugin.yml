@@ -1,5 +1,5 @@
 name: MistTags
-version: 2.3.3-beta
+version: 2.3.4-beta
 main: com.mistdig.misttags.MistTags
 api-version: '1.19'
 description: Lightweight prefix/suffix tags with TAB/LPC/LuckPerms-safe display, PlaceholderAPI, animations, dialogs, and SQLite/MySQL storage.
@@ -42,6 +42,21 @@ commands:
 # staff access to any player (misttags.manage.*) vs. self-service access to your own tag
 # only (misttags.custom). Bukkit's command permission field can't express that distinction.
 permissions:
+  misttags.admin:
+    description: Full access to every MistTags command and staff tool
+    default: op
+    children:
+      misttags.manage: true
+      misttags.reload: true
+      misttags.list: true
+      misttags.check: true
+      misttags.stats: true
+      misttags.preview: true
+  misttags.*:
+    description: Full access to every MistTags command and staff tool
+    default: op
+    children:
+      misttags.admin: true
   misttags.manage:
     description: Full access to add/remove prefixes and suffixes for any player
     default: op
@@ -51,6 +66,8 @@ permissions:
       misttags.manage.removeprefix: true
       misttags.manage.removesuffix: true
       misttags.check: true
+      misttags.list: true
+      misttags.stats: true
   misttags.manage.addprefix:
     description: Add/edit a prefix for any player
     default: op

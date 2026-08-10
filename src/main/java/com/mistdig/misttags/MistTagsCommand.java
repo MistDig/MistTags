@@ -58,6 +58,8 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
         if (sub.equals("check")) {
             return handleCheck(sender, rest);
         }
+        // Internal dialog-dispatch subcommands. These are hidden from help and tab-complete,
+        // but still require staff permission if a player tries to run them manually.
         if (sub.equals("checktime")) {
             return handleCheckTime(sender, rest);
         }
@@ -71,6 +73,9 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
             return handleDialogAnimation(sender, sub, rest);
         }
         if (sub.equals("noop")) {
+            if (!hasStaffPermission(sender, "misttags.check")) {
+                plugin.messages().send(sender, "no-permission");
+            }
             return true;
         }
         if (sub.equals("stats")) {
@@ -90,7 +95,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleReload(CommandSender sender) {
-        if (!sender.hasPermission("misttags.reload")) {
+        if (!hasPluginPermission(sender, "misttags.reload")) {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
@@ -129,7 +134,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleList(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("misttags.list")) {
+        if (!hasStaffPermission(sender, "misttags.list")) {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
@@ -161,7 +166,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleCheck(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("misttags.check")) {
+        if (!hasStaffPermission(sender, "misttags.check")) {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
@@ -183,7 +188,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleCheckTime(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("misttags.check")) {
+        if (!hasStaffPermission(sender, "misttags.check")) {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
@@ -213,7 +218,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
             plugin.messages().send(sender, "check-player-only");
             return true;
         }
-        if (!sender.hasPermission("misttags.check")) {
+        if (!hasStaffPermission(sender, "misttags.check")) {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
@@ -235,7 +240,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleDialogSave(CommandSender sender, String sub, String[] args) {
-        if (!sender.hasPermission("misttags.check")) {
+        if (!hasStaffPermission(sender, "misttags.check")) {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
@@ -282,7 +287,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleDialogAnimation(CommandSender sender, String sub, String[] args) {
-        if (!sender.hasPermission("misttags.check")) {
+        if (!hasStaffPermission(sender, "misttags.check")) {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
@@ -347,7 +352,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleStats(CommandSender sender) {
-        if (!sender.hasPermission("misttags.stats")) {
+        if (!hasStaffPermission(sender, "misttags.stats")) {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
@@ -384,7 +389,7 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
             plugin.messages().send(sender, "preview-console-only");
             return true;
         }
-        if (!sender.hasPermission("misttags.preview")) {
+        if (!hasPluginPermission(sender, "misttags.preview")) {
             plugin.messages().send(sender, "no-permission");
             return true;
         }
@@ -496,16 +501,27 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
 
     private boolean canUseRoot(CommandSender sender, String sub) {
         return switch (sub) {
-            case "addprefix" -> sender.hasPermission("misttags.manage.addprefix") || sender.hasPermission("misttags.custom");
-            case "addsuffix" -> sender.hasPermission("misttags.manage.addsuffix") || sender.hasPermission("misttags.custom");
-            case "removeprefix" -> sender.hasPermission("misttags.manage.removeprefix") || sender.hasPermission("misttags.custom");
-            case "removesuffix" -> sender.hasPermission("misttags.manage.removesuffix") || sender.hasPermission("misttags.custom");
-            case "list" -> sender.hasPermission("misttags.list");
-            case "check" -> sender.hasPermission("misttags.check");
-            case "stats" -> sender.hasPermission("misttags.stats");
-            case "preview" -> sender.hasPermission("misttags.preview");
-            case "reload" -> sender.hasPermission("misttags.reload");
+            case "addprefix" -> hasStaffPermission(sender, "misttags.manage.addprefix") || sender.hasPermission("misttags.custom");
+            case "addsuffix" -> hasStaffPermission(sender, "misttags.manage.addsuffix") || sender.hasPermission("misttags.custom");
+            case "removeprefix" -> hasStaffPermission(sender, "misttags.manage.removeprefix") || sender.hasPermission("misttags.custom");
+            case "removesuffix" -> hasStaffPermission(sender, "misttags.manage.removesuffix") || sender.hasPermission("misttags.custom");
+            case "list" -> hasStaffPermission(sender, "misttags.list");
+            case "check" -> hasStaffPermission(sender, "misttags.check");
+            case "stats" -> hasStaffPermission(sender, "misttags.stats");
+            case "preview" -> hasPluginPermission(sender, "misttags.preview");
+            case "reload" -> hasPluginPermission(sender, "misttags.reload");
             default -> false;
         };
+    }
+
+    private boolean hasStaffPermission(CommandSender sender, String specificPermission) {
+        return hasPluginPermission(sender, specificPermission) || sender.hasPermission("misttags.manage");
+    }
+
+    private boolean hasPluginPermission(CommandSender sender, String specificPermission) {
+        return sender.hasPermission(specificPermission)
+                || sender.hasPermission("misttags.admin")
+                || sender.hasPermission("misttags.*")
+                || sender.hasPermission("*");
     }
 }

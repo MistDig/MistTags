@@ -56,6 +56,45 @@ The smart display placeholders use LuckPerms as fallback when no MistTags tag is
 %misttags_display_suffix%
 ```
 
+### TAB Animations Stored In LuckPerms
+
+Some servers keep animated rank prefixes in TAB and store the TAB animation placeholder in LuckPerms, for example:
+
+```text
+%animation:sovereign%
+```
+
+That setup is supported when TAB is the display renderer. LuckPerms stores the prefix value, TAB owns and animates `%animation:sovereign%`, and MistTags decides whether to use a MistTags tag or fall back to LuckPerms.
+
+Recommended TAB group setup:
+
+```yaml
+_DEFAULT_:
+  tabprefix: "%misttags_display_prefix%"
+  tagprefix: "%misttags_display_prefix%"
+  customtabname: "%player%"
+  tabsuffix: "%misttags_display_suffix%"
+  tagsuffix: "%misttags_display_suffix%"
+```
+
+Recommended LuckPerms prefix:
+
+```text
+/lp user <player> meta setprefix 100 "%animation:sovereign%"
+```
+
+Behavior:
+
+- If the player has no MistTags prefix, `%misttags_display_prefix%` falls back to the LuckPerms prefix and TAB resolves `%animation:sovereign%`.
+- If staff run `/mt addprefix <player> <duration> <tag>`, the MistTags prefix overrides the LuckPerms/TAB rank prefix for that player.
+- Removing the MistTags prefix restores the normal LuckPerms/TAB animated prefix.
+
+MistTags does not animate TAB's `%animation:name%` placeholder itself. Keep TAB animations in TAB, or copy the frames into `plugins/MistTags/animations.yml` and use MistTags syntax such as:
+
+```text
+/mt addprefix <player> 30d anim:sovereign SOVEREIGN
+```
+
 ## Manual PlaceholderAPI Compatibility
 
 These plugins are not auto-configured by MistTags, but can usually use MistTags placeholders manually if they support PlaceholderAPI:

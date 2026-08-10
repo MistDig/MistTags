@@ -58,11 +58,19 @@ public class TagCommand implements CommandExecutor, TabCompleter {
      *  - hold misttags.custom and be targeting your own name (self-service only).
      */
     private boolean isAuthorized(CommandSender sender, String label, String targetName) {
-        if (sender.hasPermission(managePermissionFor(label))) return true;
+        if (hasManagePermission(sender, managePermissionFor(label))) return true;
 
         return sender.hasPermission("misttags.custom")
                 && sender instanceof Player player
                 && player.getName().equalsIgnoreCase(targetName);
+    }
+
+    private boolean hasManagePermission(CommandSender sender, String specificPermission) {
+        return sender.hasPermission(specificPermission)
+                || sender.hasPermission("misttags.manage")
+                || sender.hasPermission("misttags.admin")
+                || sender.hasPermission("misttags.*")
+                || sender.hasPermission("*");
     }
 
     private String managePermissionFor(String label) {
@@ -92,7 +100,7 @@ public class TagCommand implements CommandExecutor, TabCompleter {
         // through a misttags.manage.* node. isAuthorized() already confirmed one of these two
         // paths applies before handleAdd was ever called, so "not manage" here means "custom".
         boolean selfService = sender instanceof Player
-                && !sender.hasPermission(managePermissionFor(label));
+                && !hasManagePermission(sender, managePermissionFor(label));
         Player selfPlayer = selfService ? (Player) sender : null;
 
         if (isAnimation) {
@@ -291,11 +299,11 @@ public class TagCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean canUseCommand(CommandSender sender, String label) {
-        return sender.hasPermission(managePermissionFor(label)) || sender.hasPermission("misttags.custom");
+        return hasManagePermission(sender, managePermissionFor(label)) || sender.hasPermission("misttags.custom");
     }
 
     private List<String> targetSuggestions(CommandSender sender, String label, String prefix) {
-        if (sender.hasPermission(managePermissionFor(label))) return playerNameSuggestions(prefix);
+        if (hasManagePermission(sender, managePermissionFor(label))) return playerNameSuggestions(prefix);
         if (sender instanceof Player player && sender.hasPermission("misttags.custom")
                 && player.getName().toLowerCase().startsWith(prefix.toLowerCase())) {
             return List.of(player.getName());
