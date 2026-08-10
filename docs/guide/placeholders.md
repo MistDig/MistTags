@@ -10,6 +10,10 @@ MistTags registers a PlaceholderAPI expansion with the identifier `misttags`.
 | `%misttags_suffix%` | Current rendered suffix, including animation frame if animated. Adds one leading display space when not empty. |
 | `%misttags_display_prefix%` | MistTags prefix if active; otherwise LuckPerms prefix if available through PlaceholderAPI. Adds one trailing display space when not empty. |
 | `%misttags_display_suffix%` | MistTags suffix if active; otherwise LuckPerms suffix if available through PlaceholderAPI. Adds one leading display space when not empty. |
+| `%misttags_prefix_or_none%` | Current rendered MistTags prefix, or red `None` if no MistTags prefix is active. No automatic display spacing. |
+| `%misttags_suffix_or_none%` | Current rendered MistTags suffix, or red `None` if no MistTags suffix is active. No automatic display spacing. |
+| `%misttags_display_prefix_or_none%` | MistTags/LuckPerms display prefix fallback, or red `None` if empty. No automatic display spacing. |
+| `%misttags_display_suffix_or_none%` | MistTags/LuckPerms display suffix fallback, or red `None` if empty. No automatic display spacing. |
 | `%misttags_prefix_raw%` | Stored prefix value, such as `anim:rainbow`. |
 | `%misttags_suffix_raw%` | Stored suffix value, such as `anim:pulse`. |
 | `%misttags_prefix_plain%` | Prefix with formatting removed. |
@@ -54,3 +58,11 @@ Use these in TAB, LPC, chat plugins, menus, and GUIs:
 ```
 
 They show MistTags first. If the player has no MistTags prefix or suffix, they fall back to LuckPerms.
+
+For scoreboard/menu lines where you want to visibly show `None`, use the `or_none` placeholders instead of TAB's global `placeholder-output-replacements`. Example:
+
+```text
+Suffix: %misttags_suffix_or_none%
+```
+
+Keep nametags/tablist on `%misttags_display_suffix%` so players without a suffix stay clean instead of showing `None` above their head.

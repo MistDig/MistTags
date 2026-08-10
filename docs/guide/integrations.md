@@ -35,6 +35,18 @@ This means:
 - Removing the MistTags prefix restores the normal LuckPerms display.
 - Prefix placeholders include one trailing display space when not empty. Suffix placeholders include one leading display space when not empty.
 
+Do not use TAB's global `placeholder-output-replacements` to turn an empty `%misttags_display_suffix%` into `None` unless you want `None` to appear everywhere, including nametags. For scoreboards or player info menus, use:
+
+```text
+%misttags_suffix_or_none%
+```
+
+Keep TAB nametags on:
+
+```text
+%misttags_display_suffix%
+```
+
 ## LPC
 
 When LPC and PlaceholderAPI are installed, MistTags can write smart placeholders into `plugins/LPC/config.yml`:

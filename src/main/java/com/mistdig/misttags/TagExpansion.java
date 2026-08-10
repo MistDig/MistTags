@@ -45,6 +45,10 @@ public class TagExpansion extends PlaceholderExpansion {
             case "suffix" -> TagSpacingUtil.suffix(render(data.getSuffix()));
             case "display_prefix" -> TagSpacingUtil.prefix(displayValue(player, data.getPrefix(), "%luckperms_prefix%"));
             case "display_suffix" -> TagSpacingUtil.suffix(displayValue(player, data.getSuffix(), "%luckperms_suffix%"));
+            case "prefix_or_none" -> valueOrNone(render(data.getPrefix()));
+            case "suffix_or_none" -> valueOrNone(render(data.getSuffix()));
+            case "display_prefix_or_none" -> valueOrNone(displayValue(player, data.getPrefix(), "%luckperms_prefix%"));
+            case "display_suffix_or_none" -> valueOrNone(displayValue(player, data.getSuffix(), "%luckperms_suffix%"));
             case "prefix_raw" -> nullToEmpty(data.getPrefix());
             case "suffix_raw" -> nullToEmpty(data.getSuffix());
             case "prefix_plain" -> plain(render(data.getPrefix()));
@@ -90,6 +94,11 @@ public class TagExpansion extends PlaceholderExpansion {
 
     private String nullToEmpty(String value) {
         return value == null ? "" : value;
+    }
+
+    private String valueOrNone(String value) {
+        if (value == null || MiniMessageSanitizer.plainText(value).isBlank()) return "<red>None</red>";
+        return value;
     }
 
     private String displayValue(OfflinePlayer player, String mistTagsValue, String fallbackPlaceholder) {
