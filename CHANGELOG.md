@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.1-beta
+
+- Fixed `%misttags_display_prefix%`/`%misttags_display_suffix%` not resolving a placeholder embedded inside the raw LuckPerms prefix/suffix meta (e.g. `%tick_linked%OWNER`, a Discord-link checkmark placeholder typed directly into a rank's prefix) when falling back to plain LuckPerms. `PlaceholderAPI.setPlaceholders()` only resolves the literal `%luckperms_prefix%` placeholder itself in one pass; it doesn't re-scan the raw meta text that comes back as the answer, so anything nested inside that raw text stayed unresolved. TAB masks this by re-resolving nested placeholders itself when building tablist/nametag text; a plugin taking the smart placeholder at face value for a single PAPI pass (most chat formatters) does not. The fallback now runs the result through a second PlaceholderAPI pass to catch that case.
+
 ## 2.4.0-beta
 
 - Added `groups.yml`: per-LuckPerms-group default prefixes/suffixes, resolved by MistTags itself (including `anim:<name>` animation references) instead of left as raw placeholder text. Fixes animated group tags showing up as literal unresolved placeholder syntax (e.g. `%animation:<name>%`) in chat, staff-chat, or any other plugin that does a single PlaceholderAPI pass -- they only ever rendered correctly in TAB's own tablist/nametag output, which re-parses TAB's animation syntax itself.

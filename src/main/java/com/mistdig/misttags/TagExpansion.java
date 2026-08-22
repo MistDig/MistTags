@@ -118,6 +118,21 @@ public class TagExpansion extends PlaceholderExpansion {
         String fallbackPlaceholder = isPrefix ? "%luckperms_prefix%" : "%luckperms_suffix%";
         String resolved = PlaceholderAPI.setPlaceholders(player, fallbackPlaceholder);
         if (resolved == null || resolved.equalsIgnoreCase(fallbackPlaceholder)) return "";
+
+        // setPlaceholders() above only resolves %luckperms_prefix% itself, scanning the
+        // literal string "%luckperms_prefix%" for placeholders -- it doesn't re-scan the raw
+        // meta text that comes back as its answer. So a placeholder someone typed directly
+        // into a LuckPerms prefix/suffix (e.g. a Discord-link checkmark like %tick_linked%,
+        // or TAB's %animation:name%) comes back from the call above still literally present,
+        // unresolved. A plugin that itself does nested resolution (TAB, when building
+        // tablist/nametag text) masks this; one that takes %misttags_display_prefix% at face
+        // value for a single PAPI pass (chat formatters, most consumers) does not. Running
+        // the result through setPlaceholders a second time resolves anything nested in it,
+        // same as MistTags always intended this fallback to hand back finished text.
+        if (resolved.indexOf('%') >= 0) {
+            String rescanned = PlaceholderAPI.setPlaceholders(player, resolved);
+            if (rescanned != null) resolved = rescanned;
+        }
         return resolved;
     }
 
