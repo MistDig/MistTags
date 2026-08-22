@@ -1,0 +1,25 @@
+# Per-permission-group default prefixes/suffixes.
+#
+# These are used by %misttags_display_prefix% / %misttags_display_suffix% as a fallback
+# when a player has no active MistTags tag (from /mt addprefix or /mt addsuffix) -- taking
+# over the same role %luckperms_prefix% / %luckperms_suffix% would otherwise fill.
+#
+# The important difference: values here are rendered by MistTags itself, the same way a
+# player's own /mt addprefix tag is (including "anim:<name>" animation references resolved
+# against animations.yml). That means the placeholder always returns finished, already-
+# animated text -- safe for any PlaceholderAPI consumer, including chat plugins that only do
+# a single placeholder pass. Putting TAB's own %animation:name% syntax directly into a
+# LuckPerms prefix meta value only renders correctly wherever TAB builds the text itself
+# (tablist, nametags); it prints literally everywhere else, chat included.
+#
+# The group name is matched against the player's LuckPerms primary group
+# (%luckperms_primary_group_name%), case-insensitively. A player whose group isn't listed
+# here still falls back to the raw LuckPerms prefix/suffix, same as before.
+groups:
+  # sovereign:
+  #   prefix: "anim:sovereign"
+  #   suffix: ""
+  #
+  # owner:
+  #   prefix: "<gold><bold>OWNER"
+  #   suffix: ""

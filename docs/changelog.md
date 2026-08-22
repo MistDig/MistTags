@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.4.0-beta
+
+- Added `groups.yml`: per-LuckPerms-group default prefixes/suffixes, resolved by MistTags itself (including `anim:<name>` animation references) instead of left as raw placeholder text. Fixes animated group tags showing up as literal unresolved placeholder syntax (e.g. `%animation:sovereign%`) in chat, staff-chat, or any other plugin that does a single PlaceholderAPI pass -- they only ever rendered correctly in TAB's own tablist/nametag output, which re-parses TAB's animation syntax itself.
+- `%misttags_display_prefix%`/`%misttags_display_suffix%` now check `groups.yml` before falling back to the raw `%luckperms_prefix%`/`%luckperms_suffix%` passthrough.
+- Fixed `/mt addprefix`/`/mt addsuffix` tags not reliably overriding other chat-formatting plugins: `ChatListener` now runs at `HIGHEST` priority instead of the default, so an active MistTags tag wins the chat format instead of racing whichever plugin's listener happened to run last.
+- Corrected the LuckPerms/TAB integration docs, which previously recommended pasting `%animation:sovereign%` directly into a LuckPerms prefix meta value -- that only works for TAB's own rendering and silently breaks chat. Docs now recommend `groups.yml` for that use case.
+
 ## 2.3.4-beta
 
 - Fixed broad staff permissions so `misttags.manage`, `misttags.admin`, and `misttags.*` work across commands, tab completion, and the manage GUI.

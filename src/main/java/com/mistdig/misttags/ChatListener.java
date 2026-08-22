@@ -3,11 +3,19 @@ package com.mistdig.misttags;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 /**
- * Bukkit-compatible standalone chat formatting. Only registered in standalone mode.
+ * Bukkit-compatible chat formatting for players who have an active MistTags tag. Registered
+ * whenever display.chat-format is true, in both standalone and tab display mode (see
+ * DisplayManager#enable) -- players without an active tag are left alone so whatever other
+ * chat plugin/format is in use keeps handling them.
+ *
+ * Runs at HIGHEST priority (not the default NORMAL) so an active /mt addprefix/addsuffix tag
+ * reliably overrides other chat-formatting plugins instead of losing a race against
+ * whichever one happens to run last.
  */
 public class ChatListener implements Listener {
 
@@ -17,7 +25,7 @@ public class ChatListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         PlayerTagData data = plugin.getData(player.getUniqueId());
