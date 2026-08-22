@@ -54,6 +54,24 @@ LuckPerms setup actually has (check with `/lp listgroups` or `/lp user <player> 
 
 Reload with `/mt reload` or restart to pick up changes.
 
+### Adding A Placeholder Badge (e.g. a Discord-link checkmark)
+
+A value can lead with arbitrary text -- including a PlaceholderAPI placeholder -- before an
+`anim:<name>` reference, and both parts get resolved:
+
+```yaml
+groups:
+  vip:
+    prefix: "%tick_linked%anim:gradient_vip"
+    suffix: ""
+```
+
+`anim:<name>` still has to be a literal, unbroken token starting the animation portion (`anim:`
+can't appear earlier by coincidence in your badge text) -- everything before the first `anim:`
+is treated as the badge and resolved via PlaceholderAPI once the animation frame is rendered.
+This also works with no animation at all -- a group's `prefix`/`suffix` can just be
+`"%some_placeholder%"` on its own.
+
 ## Fallback Order
 
 For a player with no group entry configured, or no PlaceholderAPI/LuckPerms installed,

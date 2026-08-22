@@ -1,4 +1,4 @@
-# MistTags 2.4.1 Beta
+# MistTags 2.4.2 Beta
 
 MistTags is a lightweight prefix/suffix plugin for staff-controlled temporary and permanent tags.
 
