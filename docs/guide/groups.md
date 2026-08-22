@@ -29,7 +29,7 @@ for the full ready-made list this plugin ships with), or define your own:
 ```yaml
 # plugins/MistTags/groups.yml
 groups:
-  vip:
+  vip:               # <- your LuckPerms group's NAME, e.g. `/lp creategroup vip`
     prefix: "anim:gradient_vip"
     suffix: ""
 
@@ -41,9 +41,18 @@ groups:
 Values don't have to be animated -- a plain MiniMessage string works too, as the `owner`
 example above shows.
 
-The key (`vip`, `owner`, ...) is matched against the player's LuckPerms primary group via
-`%luckperms_primary_group_name%`, case-insensitively -- use whatever group names your own
-LuckPerms setup actually has. Reload with `/mt reload` or restart to pick up changes.
+The key (`vip`, `owner`, ...) is matched against the player's LuckPerms **primary group name**
+via `%luckperms_primary_group_name%`, case-insensitively -- use whatever group names your own
+LuckPerms setup actually has (check with `/lp listgroups` or `/lp user <player> info`).
+
+> **This is not the same thing as a LuckPerms prefix.** You are not setting anything on the
+> group in LuckPerms -- no `/lp group <name> meta setprefix ...`, nothing in LuckPerms at all.
+> The `vip` in `groups.yml` only has to match the *group's name*. A player just needs to be a
+> member of that group (`/lp user <player> parent add vip`); whatever that group's own
+> LuckPerms prefix meta says is irrelevant here, since `groups.yml` is a separate, earlier
+> fallback layer that overrides it (see the order below).
+
+Reload with `/mt reload` or restart to pick up changes.
 
 ## Fallback Order
 
