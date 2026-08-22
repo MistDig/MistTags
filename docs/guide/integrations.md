@@ -68,57 +68,13 @@ The smart display placeholders use LuckPerms as fallback when no MistTags tag is
 %misttags_display_suffix%
 ```
 
-### Animated Rank Prefixes: Use `groups.yml`, Not A Raw LuckPerms Meta Value
+### Animated Rank Prefixes
 
-Earlier versions of this page recommended putting TAB's own animation syntax straight into a
-LuckPerms prefix meta value, e.g. `/lp user <player> meta setprefix 100 "%animation:sovereign%"`.
-**Don't do that.** `%animation:name%` is TAB-internal syntax: it only gets re-parsed correctly
-wherever TAB itself builds the text (tablist, nametags). Any other consumer of a LuckPerms
-prefix -- chat plugins, staff-chat, `/msg` formats, anything doing a single PlaceholderAPI
-pass -- prints it back out as literal unresolved text, because `%animation:sovereign%` was
-never a real PlaceholderAPI placeholder in the first place. This is a common way to end up
-with `%animation:sovereign%MistDig » hi` showing up in chat while the tablist looks fine.
-
-Use `plugins/MistTags/groups.yml` instead. Group prefixes/suffixes defined there are rendered
-by MistTags itself -- the same `anim:<name>` animation resolution `/mt addprefix` uses -- so
-`%misttags_display_prefix%`/`%misttags_display_suffix%` always return finished, already-
-animated text no matter who's asking for it:
-
-```yaml
-# plugins/MistTags/groups.yml
-groups:
-  sovereign:
-    prefix: "anim:sovereign"
-    suffix: ""
-```
-
-Matched against the player's LuckPerms primary group (`%luckperms_primary_group_name%`),
-case-insensitively. Recommended TAB group setup (unchanged -- TAB still just points at the
-smart placeholders):
-
-```yaml
-_DEFAULT_:
-  tabprefix: "%misttags_display_prefix%"
-  tagprefix: "%misttags_display_prefix%"
-  customtabname: "%player%"
-  tabsuffix: "%misttags_display_suffix%"
-  tagsuffix: "%misttags_display_suffix%"
-```
-
-Behavior:
-
-- If the player has no MistTags prefix, `%misttags_display_prefix%` checks `groups.yml` for
-  their primary group before falling back further to the raw LuckPerms prefix.
-- If staff run `/mt addprefix <player> <duration> <tag>`, the MistTags prefix overrides both
-  the group tag and the LuckPerms/TAB rank prefix for that player -- in chat too, since
-  `ChatListener` runs at `HIGHEST` priority specifically so an active tag wins that race.
-- Removing the MistTags prefix restores the normal group/LuckPerms prefix.
-
-You still only need to define the animation once, in `animations.yml`:
-
-```text
-/mt addprefix <player> 30d anim:sovereign SOVEREIGN
-```
+Don't put TAB's own animation syntax straight into a LuckPerms prefix meta value (e.g.
+`/lp user <player> meta setprefix 100 "%animation:sovereign%"`) -- that only renders correctly
+wherever TAB itself builds the text (tablist, nametags), and prints as literal unresolved text
+everywhere else, chat included. Use [Groups](/guide/groups) (`groups.yml`) instead, which
+resolves animated group tags through MistTags itself so they render correctly everywhere.
 
 ## Manual PlaceholderAPI Compatibility
 
