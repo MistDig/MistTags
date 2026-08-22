@@ -53,18 +53,41 @@ public class GroupTagManager {
 
     public String getPrefix(Player player) {
         String stored = lookup(player, prefixes);
-        return stored == null ? null : plugin.renderStoredRaw(stored);
+        return stored == null ? null : render(player, stored);
     }
 
     public String getSuffix(Player player) {
         String stored = lookup(player, suffixes);
-        return stored == null ? null : plugin.renderStoredRaw(stored);
+        return stored == null ? null : render(player, stored);
     }
 
     private String lookup(Player player, Map<String, String> byGroup) {
         if (byGroup.isEmpty()) return null;
         String group = primaryGroup(player);
         return group == null ? null : byGroup.get(group);
+    }
+
+    // AnimationSpec (used by MistTags#renderStoredRaw for player custom tags too, not just
+    // groups.yml) requires "anim:" to be the literal start of the value -- not worth relaxing
+    // that shared contract just for this. So a groups.yml value can lead with arbitrary badge
+    // text before an "anim:<name>" reference, e.g. "%tick_linked%anim:sovereign": the badge
+    // portion is split off and resolved here, the "anim:..." remainder goes to MistTags' own
+    // renderer as usual, and the combined result gets one PlaceholderAPI pass so any
+    // placeholder in either half -- a Discord-link checkmark, anything -- comes back as
+    // finished text, same as every other %misttags_display_prefix%/suffix% consumer expects.
+    private String render(Player player, String stored) {
+        int animAt = stored.toLowerCase(Locale.ROOT).indexOf("anim:");
+        String badge = animAt > 0 ? stored.substring(0, animAt) : "";
+        String remainder = animAt >= 0 ? stored.substring(animAt) : stored;
+        String combined = badge + plugin.renderStoredRaw(remainder);
+        return resolvePlaceholders(player, combined);
+    }
+
+    private String resolvePlaceholders(Player player, String input) {
+        if (input == null || input.isEmpty()) return input;
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") == null) return input;
+        String resolved = PlaceholderAPI.setPlaceholders(player, input);
+        return resolved == null ? input : resolved;
     }
 
     private String primaryGroup(Player player) {
