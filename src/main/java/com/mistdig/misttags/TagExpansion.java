@@ -3,6 +3,7 @@ package com.mistdig.misttags;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -43,12 +44,12 @@ public class TagExpansion extends PlaceholderExpansion {
         return switch (key) {
             case "prefix" -> TagSpacingUtil.prefix(render(data.getPrefix()));
             case "suffix" -> TagSpacingUtil.suffix(render(data.getSuffix()));
-            case "display_prefix" -> TagSpacingUtil.prefix(displayValue(player, data.getPrefix(), "%luckperms_prefix%"));
-            case "display_suffix" -> TagSpacingUtil.suffix(displayValue(player, data.getSuffix(), "%luckperms_suffix%"));
+            case "display_prefix" -> TagSpacingUtil.prefix(displayValue(player, data.getPrefix(), true));
+            case "display_suffix" -> TagSpacingUtil.suffix(displayValue(player, data.getSuffix(), false));
             case "prefix_or_none" -> valueOrNone(render(data.getPrefix()));
             case "suffix_or_none" -> valueOrNone(render(data.getSuffix()));
-            case "display_prefix_or_none" -> valueOrNone(displayValue(player, data.getPrefix(), "%luckperms_prefix%"));
-            case "display_suffix_or_none" -> valueOrNone(displayValue(player, data.getSuffix(), "%luckperms_suffix%"));
+            case "display_prefix_or_none" -> valueOrNone(displayValue(player, data.getPrefix(), true));
+            case "display_suffix_or_none" -> valueOrNone(displayValue(player, data.getSuffix(), false));
             case "prefix_raw" -> nullToEmpty(data.getPrefix());
             case "suffix_raw" -> nullToEmpty(data.getSuffix());
             case "prefix_plain" -> plain(render(data.getPrefix()));
@@ -101,8 +102,20 @@ public class TagExpansion extends PlaceholderExpansion {
         return value;
     }
 
-    private String displayValue(OfflinePlayer player, String mistTagsValue, String fallbackPlaceholder) {
+    // Fallback order when a player has no active MistTags tag: MistTags-owned group tag
+    // (groups.yml, resolved to finished text -- safe for any consumer including chat) before
+    // the raw %luckperms_prefix%/%luckperms_suffix% passthrough. That order matters: a group
+    // entry can reference an animation via "anim:<name>", and MistTags renders that itself
+    // instead of handing back placeholder syntax another plugin has to know how to resolve.
+    private String displayValue(OfflinePlayer player, String mistTagsValue, boolean isPrefix) {
         if (mistTagsValue != null) return render(mistTagsValue);
+        if (player instanceof Player online) {
+            String groupValue = isPrefix
+                    ? plugin.getGroupTagManager().getPrefix(online)
+                    : plugin.getGroupTagManager().getSuffix(online);
+            if (groupValue != null) return groupValue;
+        }
+        String fallbackPlaceholder = isPrefix ? "%luckperms_prefix%" : "%luckperms_suffix%";
         String resolved = PlaceholderAPI.setPlaceholders(player, fallbackPlaceholder);
         if (resolved == null || resolved.equalsIgnoreCase(fallbackPlaceholder)) return "";
         return resolved;

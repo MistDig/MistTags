@@ -47,6 +47,7 @@ public class MistTags extends JavaPlugin implements Listener {
     private MessageManager messageManager;
     private TagManageMenu tagManageMenu;
     private CommandAliasManager commandAliasManager;
+    private GroupTagManager groupTagManager;
 
     // Plugins that count as "already owning" prefix/suffix display when display.mode is
     // "auto". Overridable via display.known-display-plugins in config.yml.
@@ -64,6 +65,8 @@ public class MistTags extends JavaPlugin implements Listener {
         messageManager = new MessageManager(this);
         validateStartupConfigs();
         loadAnimations();
+        groupTagManager = new GroupTagManager(this);
+        groupTagManager.load();
         loadDataConfig();
         customTagPolicy = new CustomTagPolicy(this);
         scheduler = new MistTagsScheduler(this);
@@ -244,6 +247,7 @@ public class MistTags extends JavaPlugin implements Listener {
     public MistTagsScheduler getScheduler() { return scheduler; }
     public MessageManager messages() { return messageManager; }
     public TagManageMenu getTagManageMenu() { return tagManageMenu; }
+    public GroupTagManager getGroupTagManager() { return groupTagManager; }
 
     /**
      * Backs /misttags reload. Reloads config.yml and animations.yml and re-derives
@@ -266,6 +270,7 @@ public class MistTags extends JavaPlugin implements Listener {
         createCommandConfig();
         if (commandAliasManager != null) commandAliasManager.load();
         loadAnimations();
+        groupTagManager.load();
         customTagPolicy = new CustomTagPolicy(this);
 
         boolean tabPresent = Bukkit.getPluginManager().getPlugin("TAB") != null;

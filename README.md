@@ -1,4 +1,4 @@
-# MistTags 2.3.4 Beta
+# MistTags 2.4.0 Beta
 
 MistTags is a lightweight prefix/suffix plugin for staff-controlled temporary and permanent tags.
 
@@ -26,6 +26,7 @@ This is a beta build. Test on your exact server jar before marking it stable.
 ## Features
 
 - Temporary and permanent prefixes/suffixes
+- Per-LuckPerms-group default prefixes/suffixes (`groups.yml`), rendered by MistTags itself so animated group tags work everywhere -- chat included, not just TAB/nametags
 - `/mt addprefix`, `/mt addsuffix`, `/mt removeprefix`, `/mt removesuffix`
 - `/mt list`, `/mt check`, `/mt stats`, `/mt preview`, `/mt reload`
 - Staff manage menu with delete, edit-command, and time-left buttons
