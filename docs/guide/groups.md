@@ -12,7 +12,7 @@ You can -- for plain colored text, a LuckPerms prefix works fine everywhere alre
 
 `groups.yml` exists specifically for **animated** group tags. TAB has its own `%animation:name%`
 syntax, but that syntax only gets re-parsed correctly wherever TAB itself builds the text
-(tablist, nametags). If you paste `%animation:sovereign%` straight into a LuckPerms prefix meta
+(tablist, nametags). If you paste `%animation:<name>%` straight into a LuckPerms prefix meta
 value, it renders fine in the tablist but prints out as literal, unresolved text everywhere else
 -- chat, staff-chat, `/msg`, any plugin that does a single PlaceholderAPI pass instead of TAB's
 own animation-aware renderer.
@@ -23,24 +23,14 @@ already-animated text -- safe for any consumer, chat included.
 
 ## Setup
 
-Define the animation once in `animations.yml` (see [Animation Presets](/guide/animations) for
-ready-made ones), then reference it by name in `groups.yml`:
-
-```yaml
-# plugins/MistTags/animations.yml
-animations:
-  sovereign:
-    update-ticks: 50
-    frames:
-      - "<b><gradient:#F2B4FF:#A226AD>SOVEREIGN</gradient></b>"
-      - "<b><gradient:#F2B4FF:#A428B0>SOVEREIGN</gradient></b>"
-```
+Reference any animation already in `animations.yml` by name (see [Animation Presets](/guide/animations)
+for the full ready-made list this plugin ships with), or define your own:
 
 ```yaml
 # plugins/MistTags/groups.yml
 groups:
-  sovereign:
-    prefix: "anim:sovereign"
+  vip:
+    prefix: "anim:gradient_vip"
     suffix: ""
 
   owner:
@@ -51,9 +41,9 @@ groups:
 Values don't have to be animated -- a plain MiniMessage string works too, as the `owner`
 example above shows.
 
-The key (`sovereign`, `owner`, ...) is matched against the player's LuckPerms primary group via
-`%luckperms_primary_group_name%`, case-insensitively. Reload with `/mt reload` or restart to
-pick up changes.
+The key (`vip`, `owner`, ...) is matched against the player's LuckPerms primary group via
+`%luckperms_primary_group_name%`, case-insensitively -- use whatever group names your own
+LuckPerms setup actually has. Reload with `/mt reload` or restart to pick up changes.
 
 ## Fallback Order
 

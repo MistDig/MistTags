@@ -71,7 +71,7 @@ The smart display placeholders use LuckPerms as fallback when no MistTags tag is
 ### Animated Rank Prefixes
 
 Don't put TAB's own animation syntax straight into a LuckPerms prefix meta value (e.g.
-`/lp user <player> meta setprefix 100 "%animation:sovereign%"`) -- that only renders correctly
+`/lp user <player> meta setprefix 100 "%animation:<name>%"`) -- that only renders correctly
 wherever TAB itself builds the text (tablist, nametags), and prints as literal unresolved text
 everywhere else, chat included. Use [Groups](/guide/groups) (`groups.yml`) instead, which
 resolves animated group tags through MistTags itself so they render correctly everywhere.

@@ -16,8 +16,8 @@
 # (%luckperms_primary_group_name%), case-insensitively. A player whose group isn't listed
 # here still falls back to the raw LuckPerms prefix/suffix, same as before.
 groups:
-  # sovereign:
-  #   prefix: "anim:sovereign"
+  # vip:
+  #   prefix: "anim:gradient_vip"
   #   suffix: ""
   #
   # owner:
