@@ -21,6 +21,8 @@ features:
     details: Auto-configures TAB and LPC when PlaceholderAPI is installed, while falling back to standalone display on simple servers.
   - title: Staff-controlled tags
     details: Add temporary or permanent prefixes and suffixes without replacing a player's normal LuckPerms rank unless a MistTags tag is active.
+  - title: Group tags
+    details: Give every LuckPerms group a default prefix/suffix in groups.yml, animations included -- rendered by MistTags itself so it's safe in chat, not just TAB.
   - title: Server-friendly storage
     details: Use SQLite by default, or switch to MySQL/MariaDB for larger installs.
 ---
