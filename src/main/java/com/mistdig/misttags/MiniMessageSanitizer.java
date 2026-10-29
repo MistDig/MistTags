@@ -22,7 +22,7 @@ public final class MiniMessageSanitizer {
             "gold", "gray", "grey", "dark_gray", "dark_grey", "blue", "green", "aqua",
             "red", "light_purple", "yellow", "white", "bold", "b", "italic", "i",
             "underlined", "u", "strikethrough", "st", "obfuscated",
-            "obf", "reset", "gradient", "rainbow"
+            "obf", "reset", "gradient", "rainbow", "color", "colour", "c"
     );
     private static final Map<String, String> LEGACY_CODES = Map.ofEntries(
             Map.entry("black", "0"), Map.entry("dark_blue", "1"), Map.entry("dark_green", "2"),
@@ -55,6 +55,19 @@ public final class MiniMessageSanitizer {
 
     @SuppressWarnings("deprecation")
     public static String toLegacy(String raw) {
+        try {
+            Object component = toComponent(raw);
+            Class<?> serializerClass = Class.forName("net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer");
+            Object builder = serializerClass.getMethod("builder").invoke(null);
+            Class<?> builderClass = Class.forName("net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer$Builder");
+            builderClass.getMethod("hexColors").invoke(builder);
+            builderClass.getMethod("useUnusualXRepeatedCharacterHexFormat").invoke(builder);
+            Object serializer = builderClass.getMethod("build").invoke(builder);
+            return (String) serializerClass.getMethod("serialize", Class.forName("net.kyori.adventure.text.Component"))
+                    .invoke(serializer, component);
+        } catch (ReflectiveOperationException | LinkageError | RuntimeException ignored) {
+            // Older Bukkit runtimes may not provide Adventure.
+        }
         String safe = ChatColor.translateAlternateColorCodes('&', toSafeString(raw));
         Matcher matcher = TAG.matcher(safe);
         StringBuffer out = new StringBuffer();
@@ -78,6 +91,27 @@ public final class MiniMessageSanitizer {
     public static String plainText(String raw) {
         String noTags = TAG.matcher(raw == null ? "" : raw).replaceAll("");
         return LEGACY.matcher(noTags).replaceAll("");
+    }
+
+    public static Object toComponent(String raw) throws ReflectiveOperationException {
+        String safe = toSafeString(raw);
+        Matcher codes = LEGACY.matcher(safe);
+        StringBuffer converted = new StringBuffer();
+        while (codes.find()) {
+            String code = codes.group().substring(1).toLowerCase(Locale.ROOT);
+            String name = LEGACY_CODES.entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(code))
+                    .map(Map.Entry::getKey).findFirst().orElse("reset");
+            String reset = code.matches("[0-9a-f]") ? "<reset>" : "";
+            codes.appendReplacement(converted, Matcher.quoteReplacement(reset + "<" + name + ">"));
+        }
+        codes.appendTail(converted);
+        Class<?> miniClass = Class.forName("net.kyori.adventure.text.minimessage.MiniMessage");
+        Object mini = miniClass.getMethod("miniMessage").invoke(null);
+        Class<?> resolverClass = Class.forName("net.kyori.adventure.text.minimessage.tag.resolver.TagResolver");
+        Object resolver = resolverClass.getMethod("empty").invoke(null);
+        return miniClass.getMethod("deserialize", String.class, resolverClass)
+                .invoke(mini, converted.toString(), resolver);
     }
 
     private static String hexToLegacy(String hex) {

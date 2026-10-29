@@ -91,11 +91,13 @@ public final class PaperDialogUtil {
 
     private static Object buildEditType(PlayerTagData data, String type) throws ReflectiveOperationException {
         Class<?> dialogTypeClass = Class.forName("io.papermc.paper.registry.data.dialog.type.DialogType");
-        Object save = commandTemplateButton("Save", "Save this " + type,
+        Object save = commandTemplateButton("Save Timed", "Save using the duration field",
                 "mt set" + type + "raw " + data.getName() + " $(duration) $(tag)");
+        Object permanent = commandTemplateButton("Save Permanent", "Save with no expiry",
+                "mt set" + type + "raw " + data.getName() + " perm $(tag)");
         Object cancel = runButton("Cancel", "Back to tag menu", "mt check " + data.getName());
-        return dialogTypeClass.getMethod("confirmation", actionButtonClass(), actionButtonClass())
-                .invoke(null, save, cancel);
+        return dialogTypeClass.getMethod("multiAction", List.class, actionButtonClass(), int.class)
+                .invoke(null, List.of(save, permanent), cancel, 2);
     }
 
     private static Object buildTimeBase(PlayerTagData data, String type) throws ReflectiveOperationException {
@@ -212,9 +214,7 @@ public final class PaperDialogUtil {
 
     private static Object mini(String value) throws ReflectiveOperationException {
         try {
-            Class<?> miniClass = Class.forName("net.kyori.adventure.text.minimessage.MiniMessage");
-            Object mini = miniClass.getMethod("miniMessage").invoke(null);
-            return mini.getClass().getMethod("deserialize", String.class).invoke(mini, value);
+            return MiniMessageSanitizer.toComponent(value);
         } catch (ReflectiveOperationException | RuntimeException ignored) {
             return legacy(MiniMessageSanitizer.toLegacy(value));
         }
@@ -256,9 +256,10 @@ public final class PaperDialogUtil {
     }
 
     private static String defaultDuration(String stored, long expireAt) {
+        if (stored != null && expireAt <= 0) return "perm";
         if (stored != null && expireAt > 0) {
             long millis = expireAt - System.currentTimeMillis();
-            if (millis > 0) return DurationParser.describe(Duration.ofMillis(millis)).replace(" ", "");
+            if (millis > 0) return Math.max(1L, millis / 1000L) + "s";
         }
         return "30m";
     }

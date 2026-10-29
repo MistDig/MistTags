@@ -265,6 +265,14 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
 
         long expireAt = permanent ? 0L : System.currentTimeMillis() + duration.toMillis();
         String value = MiniMessageSanitizer.toSafeString(String.join(" ", Arrays.copyOfRange(args, 2, args.length)).trim());
+        AnimationSpec animation = AnimationSpec.fromInput(value);
+        if (animation != null) {
+            if (!plugin.getAnimations().containsKey(animation.id())) {
+                plugin.messages().send(sender, "animation-missing", Map.of("animation", animation.id()));
+                return true;
+            }
+            value = animation.store();
+        }
         if (value.isBlank()) {
             if (type.equals("prefix")) data.clearPrefix(); else data.clearSuffix();
         } else if (type.equals("prefix")) {
@@ -313,7 +321,8 @@ public class MistTagsCommand implements CommandExecutor, TabCompleter {
 
         String text = animationText(stored);
         if (selected.equals("none")) {
-            if (type.equals("prefix")) data.setPrefix(text, expireAt); else data.setSuffix(text, expireAt);
+            String unanimated = AnimationSpec.parse(stored) == null ? stored : text;
+            if (type.equals("prefix")) data.setPrefix(unanimated, expireAt); else data.setSuffix(unanimated, expireAt);
         } else {
             if (!plugin.getAnimations().containsKey(selected)) {
                 plugin.messages().send(sender, "animation-missing", Map.of("animation", selected));

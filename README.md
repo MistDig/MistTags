@@ -1,4 +1,4 @@
-# MistTags 2.3.4 Beta
+# MistTags 2.3.5 Beta
 
 MistTags is a lightweight prefix/suffix plugin for staff-controlled temporary and permanent tags.
 
@@ -19,7 +19,9 @@ Expected game versions:
 - 1.19.x
 - 1.20.x
 - 1.21.x
-- 26.1.x / 26.2.x, pending live testing
+- 26.1.x / 26.2.x / 26.3, pending live testing
+
+Paper 26.3 requires Java 25. The plugin's Java 17 bytecode target is retained for older servers; it does not replace the server's Java requirement. The 26.3 candidate has not yet been validated on a live 26.3 server.
 
 This is a beta build. Test on your exact server jar before marking it stable.
 

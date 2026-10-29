@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.3.5-beta (Unreleased)
+
+- Added Save Permanent alongside Save Timed in the prefix/suffix edit dialog.
+- Prepared a Minecraft/Paper 26.3 compatibility candidate; live 26.3 validation is pending.
+- Use native Adventure components for action-bar previews on Paper, preserving MiniMessage gradients and formatting scope.
+- Preserve formatted text when choosing None in the dialog animation picker.
+- Validate and normalize animation IDs entered in dialog editors.
+- Keep permanent tags permanent by default when editing and show sub-minute durations in seconds.
+
 ## 2.3.4-beta
 
 - Fixed broad staff permissions so `misttags.manage`, `misttags.admin`, and `misttags.*` work across commands, tab completion, and the manage GUI.

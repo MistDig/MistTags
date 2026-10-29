@@ -67,6 +67,14 @@ It shows:
 
 On Paper builds with Dialog UI support, MistTags opens a native dialog. Edit dialogs include both the tag text and duration, so edits do not silently become permanent.
 
+The edit dialog offers **Save Timed**, **Save Permanent**, and **Cancel**. Save Permanent uses the entered tag text with no expiry, regardless of the duration field. The duration field also accepts `perm`, `permanent`, `forever`, and `never`. After saving plain text, choose None to keep its formatting or choose an animation from the loaded presets.
+
+On Paper, `/mt preview` renders cosmetic MiniMessage, including gradients, hex colors, and decorations. For example:
+
+```text
+/mt preview <gradient:#ff5555:#55ffff><bold>VIP</bold></gradient>
+```
+
 Rows in `/mt list` are clickable for players and open the same menu.
 
 ## Custom Command Aliases

@@ -4,9 +4,9 @@ MistTags is a Bukkit-family plugin for temporary and permanent player prefixes/s
 
 ## Requirements
 
-- Java 17 or newer
+- Java appropriate for your server version (Paper 26.3 requires Java 25; the plugin itself targets Java 17 bytecode)
 - Bukkit, Spigot, Paper, Purpur, or Folia
-- Minecraft versions tested/targeted by the beta line: `1.19.x`, `1.20.x`, `1.21.x`, `26.1.x`, and `26.2.x`
+- Compatibility targets: `1.19.x`, `1.20.x`, `1.21.x`, `26.1.x`, `26.2.x`, and `26.3`. These are targets, not a claim of testing every version/loader combination. Live 26.3 validation is pending.
 
 ## Optional Plugins
 
