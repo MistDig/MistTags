@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.3.5-beta (Unreleased)
+## 2.4.3-beta
 
 - Added Save Permanent alongside Save Timed in the prefix/suffix edit dialog.
 - Prepared a Minecraft/Paper 26.3 compatibility candidate; live 26.3 validation is pending.
@@ -8,6 +8,21 @@
 - Preserve formatted text when choosing None in the dialog animation picker.
 - Validate and normalize animation IDs entered in dialog editors.
 - Keep permanent tags permanent by default when editing and show sub-minute durations in seconds.
+
+## 2.4.2-beta
+
+- `groups.yml` prefix/suffix values can now lead with arbitrary text -- including a PlaceholderAPI placeholder -- before an `anim:<name>` reference, e.g. `"%tick_linked%anim:sovereign"`. Previously a groups.yml value went straight to MistTags' own animation renderer, which only understands its own `anim:<name>` syntax and never touched PlaceholderAPI at all, so a placeholder (a Discord-link checkmark, anything) baked into a group's tag had no path to resolve -- unlike the plain-LuckPerms-prefix fallback fixed in 2.4.1-beta, which is a completely different code path.
+
+## 2.4.1-beta
+
+- Fixed `%misttags_display_prefix%`/`%misttags_display_suffix%` not resolving a placeholder embedded inside the raw LuckPerms prefix/suffix meta (e.g. `%tick_linked%OWNER`, a Discord-link checkmark placeholder typed directly into a rank's prefix) when falling back to plain LuckPerms. `PlaceholderAPI.setPlaceholders()` only resolves the literal `%luckperms_prefix%` placeholder itself in one pass; it doesn't re-scan the raw meta text that comes back as the answer, so anything nested inside that raw text stayed unresolved. TAB masks this by re-resolving nested placeholders itself when building tablist/nametag text; a plugin taking the smart placeholder at face value for a single PAPI pass (most chat formatters) does not. The fallback now runs the result through a second PlaceholderAPI pass to catch that case.
+
+## 2.4.0-beta
+
+- Added `groups.yml`: per-LuckPerms-group default prefixes/suffixes, resolved by MistTags itself (including `anim:<name>` animation references) instead of left as raw placeholder text. Fixes animated group tags showing up as literal unresolved placeholder syntax (e.g. `%animation:<name>%`) in chat, staff-chat, or any other plugin that does a single PlaceholderAPI pass -- they only ever rendered correctly in TAB's own tablist/nametag output, which re-parses TAB's animation syntax itself.
+- `%misttags_display_prefix%`/`%misttags_display_suffix%` now check `groups.yml` before falling back to the raw `%luckperms_prefix%`/`%luckperms_suffix%` passthrough.
+- Fixed `/mt addprefix`/`/mt addsuffix` tags not reliably overriding other chat-formatting plugins: `ChatListener` now runs at `HIGHEST` priority instead of the default, so an active MistTags tag wins the chat format instead of racing whichever plugin's listener happened to run last.
+- Corrected the LuckPerms/TAB integration docs, which previously recommended pasting `%animation:<name>%` directly into a LuckPerms prefix meta value -- that only works for TAB's own rendering and silently breaks chat. Docs now recommend `groups.yml` for that use case.
 
 ## 2.3.4-beta
 

@@ -37,9 +37,9 @@ Status: Reported; source investigation requested.
 
 ## Minecraft/Paper 26.3 Compatibility
 
-- Local candidate version: 2.3.5-beta. Keep older server compatibility and the existing minimum api-version rather than making 26.3 mandatory.
+- Release candidate version: 2.4.3-beta, merged with the existing 2.4.2-beta group-tag and placeholder fixes. Keep older server compatibility and the existing minimum api-version rather than making 26.3 mandatory.
 - Paper 26.3 requires Java 25 for the server runtime. Java 17 bytecode remains the plugin build target.
 - Official references: https://papermc.io/news/26-3/ and https://docs.papermc.io/paper/getting-started/
 - A live 26.3 server test is required before claiming verified support. Server downloads are blocked by this session's network restrictions.
 - After relocating the workspace to D:, Java 17 compilation and jar packaging passed. RenderingSmokeTest passed against cached Adventure 4.26.1 for gradients, color aliases, closed formatting scope, legacy decoration reset, and RGB serialization. This does not replace live server validation.
-- Docs build remains blocked by unresolved vue/server-renderer in the relocated dependency tree. GitHub upload requires reauthentication of both the connected app and CLI.
+- Previous workspace attempts hit a missing vue/server-renderer dependency and GitHub authentication failures. Both are resolved. The merged 2.4.3-beta jar compiles, the rendering smoke tests pass with Adventure 4.26.1 and 5.2.0, and the VitePress documentation build passes. Live server/dialog interaction validation remains pending.
