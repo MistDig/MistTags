@@ -1,5 +1,5 @@
 name: MistTags
-version: 2.4.3-beta
+version: 2.4.4-beta
 main: com.mistdig.misttags.MistTags
 api-version: '1.19'
 description: Lightweight prefix/suffix tags with TAB/LPC/LuckPerms-safe display, PlaceholderAPI, animations, dialogs, and SQLite/MySQL storage.
@@ -17,7 +17,7 @@ folia-supported: true
 # detects them and defers rendering to them in "auto" display mode -- see
 # display.known-display-plugins in config.yml. Listing them here (rather than leaving them
 # undeclared) makes sure they load before MistTags so detection at startup is accurate.
-softdepend: [PlaceholderAPI, TAB, LPC, LuckPerms, NametagEdit, Essentials, DeluxeTags, UltraPrefixes, TitleManager]
+softdepend: [PlaceholderAPI, TAB, LPC, LuckPerms, NametagEdit, Essentials, DeluxeTags, UltraPrefixes, TitleManager, RPEngine]
 
 commands:
   misttags:

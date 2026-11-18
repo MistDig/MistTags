@@ -24,6 +24,11 @@ public final class RenderingSmokeTest {
         require(legacy.get(0).bold() && !legacy.get(1).bold(), "legacy color must clear bold");
         require(!MiniMessageSanitizer.toSafeString("<click:run_command:'/op x'>VIP</click>").contains("click"),
                 "interactive tags must be removed");
+        String effect = "\u00a7x\u00a7f\u00a7c\u00a78\u00a70\u00a7f\u00a78VIP\u00a7r";
+        require(render(effect).get(0).color().value() == 0xfc80f8,
+                "RP Engine legacy hex effect colours must survive sanitization");
+        require(MiniMessageSanitizer.plainText(effect).equals("VIP"),
+                "plain text must remove the entire legacy hex colour");
         require(MiniMessageSanitizer.toLegacy("<gradient:#ff0000:#0000ff>VIP</gradient>").contains("\u00a7x"),
                 "legacy output must preserve RGB formatting on Adventure runtimes");
         System.out.println("Rendering smoke tests passed");
