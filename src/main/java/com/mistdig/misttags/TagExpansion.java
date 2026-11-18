@@ -46,6 +46,8 @@ public class TagExpansion extends PlaceholderExpansion {
             case "suffix" -> TagSpacingUtil.suffix(render(data.getSuffix()));
             case "display_prefix" -> TagSpacingUtil.prefix(displayValue(player, data.getPrefix(), true));
             case "display_suffix" -> TagSpacingUtil.suffix(displayValue(player, data.getSuffix(), false));
+            case "display_prefix_legacy" -> TagSpacingUtil.prefix(MiniMessageSanitizer.toLegacy(displayValue(player, data.getPrefix(), true)));
+            case "display_suffix_legacy" -> TagSpacingUtil.suffix(MiniMessageSanitizer.toLegacy(displayValue(player, data.getSuffix(), false)));
             case "prefix_or_none" -> valueOrNone(render(data.getPrefix()));
             case "suffix_or_none" -> valueOrNone(render(data.getSuffix()));
             case "display_prefix_or_none" -> valueOrNone(displayValue(player, data.getPrefix(), true));

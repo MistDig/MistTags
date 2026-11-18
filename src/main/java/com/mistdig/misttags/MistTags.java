@@ -48,6 +48,7 @@ public class MistTags extends JavaPlugin implements Listener {
     private TagManageMenu tagManageMenu;
     private CommandAliasManager commandAliasManager;
     private GroupTagManager groupTagManager;
+    private final AtomicBoolean textEffectWarning = new AtomicBoolean(false);
 
     // Plugins that count as "already owning" prefix/suffix display when display.mode is
     // "auto". Overridable via display.known-display-plugins in config.yml.
@@ -221,9 +222,27 @@ public class MistTags extends JavaPlugin implements Listener {
         AnimationSpec spec = AnimationSpec.parse(stored);
         if (spec != null) {
             AnimationData anim = animations.get(spec.id());
-            return anim == null ? "" : anim.getCurrentFrame(spec.text());
+            return anim == null ? "" : formatTextEffects(anim.getCurrentFrame(spec.text()));
         }
         return stored;
+    }
+
+    private String formatTextEffects(String text) {
+        if (!text.contains("<fx:")) return text;
+        String fallback = text.replaceAll("</?fx(?::[^>]+)?>", "");
+        var engine = Bukkit.getPluginManager().getPlugin("RPEngine");
+        if (engine == null || !engine.isEnabled()) return fallback;
+        try {
+            Object effects = engine.getClass().getMethod("textEffects").invoke(engine);
+            Class<?> api = engine.getClass().getClassLoader().loadClass("ai.resourcepack.engine.api.TextEffects");
+            String formatted = (String) api.getMethod("format", String.class).invoke(effects, text);
+            return formatted.replaceAll("</?fx(?::[^>]+)?>", "");
+        } catch (ReflectiveOperationException | LinkageError error) {
+            if (textEffectWarning.compareAndSet(false, true)) {
+                getLogger().log(java.util.logging.Level.WARNING, "Could not resolve RP Engine text effects", error);
+            }
+            return fallback;
+        }
     }
 
     private void sweepExpiredTags() {
