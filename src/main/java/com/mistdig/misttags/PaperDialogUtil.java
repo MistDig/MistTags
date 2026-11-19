@@ -138,7 +138,10 @@ public final class PaperDialogUtil {
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .forEach(id -> {
                     try {
-                        actions.add(runButton(id, "Use anim:" + id, commandPrefix + id));
+                        String name = id.replaceFirst("^rpai_", "")
+                                .replaceFirst("(?:_text_effect|_text|_effect)$", "").replace('_', ' ');
+                        String preview = plugin.renderStoredRaw(new AnimationSpec(id, name).store());
+                        actions.add(runButton(preview, "Use " + name, commandPrefix + id));
                     } catch (ReflectiveOperationException e) {
                         throw new IllegalStateException(e);
                     }
@@ -193,7 +196,7 @@ public final class PaperDialogUtil {
     }
 
     private static Object button(String label, String tooltip, Object action) throws ReflectiveOperationException {
-        Object builder = actionButtonClass().getMethod("builder", componentClass()).invoke(null, text(label));
+        Object builder = actionButtonClass().getMethod("builder", componentClass()).invoke(null, mini(label));
         invoke(builder, "tooltip", text(tooltip));
         invoke(builder, "width", 150);
         invoke(builder, "action", action);
