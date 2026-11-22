@@ -83,6 +83,7 @@ public class MistTags extends JavaPlugin implements Listener {
         boolean placeholderApiPresent = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
 
         displayMode = resolveDisplayMode(tabPresent);
+        if (tabPresent) new TabJoinRefresh(this).enable();
 
         if (placeholderApiPresent) {
             new TagExpansion(this).register();
